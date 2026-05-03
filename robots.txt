@@ -1,0 +1,52 @@
+# NeoWallz — robots.txt
+# https://neowallz.vercel.app
+
+User-agent: *
+Allow: /
+
+# Admin pages block karo
+Disallow: /pages/admin/
+Disallow: /admin/
+
+# User private pages block karo
+Disallow: /pages/profile.html
+Disallow: /pages/saved.html
+Disallow: /pages/downloads.html
+Disallow: /profile
+Disallow: /saved
+Disallow: /downloads
+
+# Search results (dynamic) block karo — duplicate content se bachao
+Disallow: /pages/search.html?*
+Disallow: /search?*
+
+# Sitemap
+Sitemap: https://neowallz.vercel.app/sitemap.xml
+
+# ---- Bot specific rules ----
+
+# Google
+User-agent: Googlebot
+Allow: /
+Allow: /pages/wallpapers.html
+Allow: /pages/category.html
+Allow: /pages/wallpaper-detail.html
+Disallow: /pages/admin/
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Disallow: /pages/admin/
+
+# Bad bots block karo
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

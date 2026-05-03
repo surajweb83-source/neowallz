@@ -1,0 +1,112 @@
+{
+  "rewrites": [
+    {
+      "source": "/wallpapers",
+      "destination": "/pages/wallpapers.html"
+    },
+    {
+      "source": "/categories",
+      "destination": "/pages/category.html"
+    },
+    {
+      "source": "/search",
+      "destination": "/pages/search.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/pages/login.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/pages/profile.html"
+    },
+    {
+      "source": "/saved",
+      "destination": "/pages/saved.html"
+    },
+    {
+      "source": "/downloads",
+      "destination": "/pages/downloads.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/pages/legal/about.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/pages/legal/contact.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/pages/legal/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/pages/legal/terms.html"
+    },
+    {
+      "source": "/dmca",
+      "destination": "/pages/legal/dmca.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/pages/admin/dashboard.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}

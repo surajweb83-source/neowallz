@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://neowallz.vercel.app/</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- All Wallpapers -->
+  <url>
+    <loc>https://neowallz.vercel.app/wallpapers</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Categories Page -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Search Page -->
+  <url>
+    <loc>https://neowallz.vercel.app/search</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Category — Anime -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=anime</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Category — Gaming -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=gaming</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Category — Cyberpunk -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=cyberpunk</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Category — Space -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=space</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Category — Nature -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=nature</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Category — Cars -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=cars</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Category — Abstract -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=abstract</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Category — Dark -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=dark</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Category — Movies -->
+  <url>
+    <loc>https://neowallz.vercel.app/categories?cat=movies</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Login Page -->
+  <url>
+    <loc>https://neowallz.vercel.app/login</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- About -->
+  <url>
+    <loc>https://neowallz.vercel.app/about</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Contact -->
+  <url>
+    <loc>https://neowallz.vercel.app/contact</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://neowallz.vercel.app/privacy</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Terms -->
+  <url>
+    <loc>https://neowallz.vercel.app/terms</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- DMCA -->
+  <url>
+    <loc>https://neowallz.vercel.app/dmca</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

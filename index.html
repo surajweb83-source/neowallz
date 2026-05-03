@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeoWallz — Anime & Gaming Wallpapers</title>
+  <meta name="description" content="Download free HD Anime & Gaming wallpapers for Android, iPhone & PC.">
+
+  <!-- SEO Meta Tags -->
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="NeoWallz" />
+  <meta name="keywords" content="anime wallpapers, gaming wallpapers, HD wallpapers, free wallpapers, 4K wallpapers, cyberpunk wallpapers, naruto wallpaper, valorant wallpaper, phone wallpaper" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="NeoWallz — Free Anime & Gaming Wallpapers" />
+  <meta property="og:description" content="Download 9000+ HD Anime & Gaming wallpapers for free. Android, iPhone, PC — all devices." />
+  <meta property="og:url" content="https://neowallz.vercel.app" />
+  <meta property="og:image" content="https://neowallz.vercel.app/assets/logo/og-image.jpg" />
+  <meta property="og:site_name" content="NeoWallz" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NeoWallz — Free Anime & Gaming Wallpapers" />
+  <meta name="twitter:description" content="Download 9000+ HD Anime & Gaming wallpapers free!" />
+  <meta name="twitter:image" content="https://neowallz.vercel.app/assets/logo/og-image.jpg" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://neowallz.vercel.app/" />
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "NeoWallz",
+    "url": "https://neowallz.vercel.app",
+    "description": "Free HD Anime & Gaming Wallpapers for all devices",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://neowallz.vercel.app/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "NeoWallz",
+      "url": "https://neowallz.vercel.app"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html" class="active">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html" class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container hero-content">
+    <div class="hero-badge">✨ 10,000+ Free Wallpapers</div>
+    <h1 class="hero-title">
+      Download <span class="text-purple">Anime</span> &
+      <span class="text-cyan">Gaming</span><br>Wallpapers Free
+    </h1>
+    <p class="hero-subtitle">HD Quality • All Devices • No Login Required</p>
+    <div class="hero-search">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="heroSearch"
+          placeholder="Search... (Naruto, Valorant, 4K)"
+          autocomplete="off" />
+        <button class="search-btn" onclick="doSearch()">Search</button>
+      </div>
+      <div class="popular-tags">
+        <span class="tag-label">Popular:</span>
+        <button class="tag-btn" onclick="searchTag('Naruto')">Naruto</button>
+        <button class="tag-btn" onclick="searchTag('Valorant')">Valorant</button>
+        <button class="tag-btn" onclick="searchTag('Cyberpunk')">Cyberpunk</button>
+        <button class="tag-btn" onclick="searchTag('4K')">4K</button>
+        <button class="tag-btn" onclick="searchTag('Dark')">Dark</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section categories-section">
+  <div class="container">
+    <h2 class="section-title">Browse <span class="text-cyan">Categories</span></h2>
+    <p class="section-subtitle">Apni pasand ki category chuno</p>
+    <div class="categories-grid">
+      <a href="/pages/category.html?cat=anime" class="cat-card">
+        <div class="cat-icon">⛩️</div>
+        <div class="cat-name">Anime</div>
+        <div class="cat-count">2,400+</div>
+      </a>
+      <a href="/pages/category.html?cat=gaming" class="cat-card">
+        <div class="cat-icon">🎮</div>
+        <div class="cat-name">Gaming</div>
+        <div class="cat-count">1,800+</div>
+      </a>
+      <a href="/pages/category.html?cat=cyberpunk" class="cat-card">
+        <div class="cat-icon">🌆</div>
+        <div class="cat-name">Cyberpunk</div>
+        <div class="cat-count">950+</div>
+      </a>
+      <a href="/pages/category.html?cat=space" class="cat-card">
+        <div class="cat-icon">🚀</div>
+        <div class="cat-name">Space</div>
+        <div class="cat-count">700+</div>
+      </a>
+      <a href="/pages/category.html?cat=nature" class="cat-card">
+        <div class="cat-icon">🌿</div>
+        <div class="cat-name">Nature</div>
+        <div class="cat-count">600+</div>
+      </a>
+      <a href="/pages/category.html?cat=cars" class="cat-card">
+        <div class="cat-icon">🚗</div>
+        <div class="cat-name">Cars & Bikes</div>
+        <div class="cat-count">500+</div>
+      </a>
+      <a href="/pages/category.html?cat=abstract" class="cat-card">
+        <div class="cat-icon">🎨</div>
+        <div class="cat-name">Abstract</div>
+        <div class="cat-count">800+</div>
+      </a>
+      <a href="/pages/category.html?cat=movies" class="cat-card">
+        <div class="cat-icon">🎬</div>
+        <div class="cat-name">Movies & TV</div>
+        <div class="cat-count">400+</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED WALLPAPERS -->
+<section class="section featured-section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Featured <span class="text-purple">Wallpapers</span></h2>
+        <p class="section-subtitle">Aaj ke best picks</p>
+      </div>
+      <a href="/pages/wallpapers.html" class="btn btn-outline">View All →</a>
+    </div>
+    <div class="wallpaper-grid" id="featuredGrid"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Neo<span class="text-purple">Wallz</span></div>
+      <p>Best Anime & Gaming wallpapers — Free forever.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/pages/wallpapers.html">All Wallpapers</a></li>
+        <li><a href="/pages/category.html">Categories</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="/pages/login.html">Login / Register</a></li>
+        <li><a href="/pages/profile.html">My Profile</a></li>
+        <li><a href="/pages/saved.html">Saved</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/pages/legal/privacy.html">Privacy</a></li>
+        <li><a href="/pages/legal/terms.html">Terms</a></li>
+        <li><a href="/pages/legal/dmca.html">DMCA</a></li>
+        <li><a href="/pages/legal/contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="text-muted">© 2025 NeoWallz — All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- JS -->
+<script src="js/main.js"></script>
+<script src="js/wallpapers.js"></script>
+<script>
+  // Search
+  function doSearch() {
+    const q = document.getElementById('heroSearch').value.trim();
+    if (q) window.location.href = `/pages/search.html?q=${encodeURIComponent(q)}`;
+  }
+  function searchTag(tag) {
+    window.location.href = `/pages/search.html?q=${encodeURIComponent(tag)}`;
+  }
+  document.getElementById('heroSearch').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  // Demo wallpapers (Supabase baad mein)
+  const demoWallpapers = [
+    { id:'1', title:'Naruto Sage Mode',  category:'Anime',    resolution:'4K', is_featured:true,  likes_count:245, thumbnail_url:'https://picsum.photos/seed/naruto/400/700', image_url:'https://picsum.photos/seed/naruto/1920/1080' },
+    { id:'2', title:'Valorant Agents',   category:'Gaming',   resolution:'2K', is_featured:false, likes_count:189, thumbnail_url:'https://picsum.photos/seed/valo/400/700',   image_url:'https://picsum.photos/seed/valo/1920/1080'   },
+    { id:'3', title:'Cyberpunk City',    category:'Cyberpunk',resolution:'HD', is_featured:true,  likes_count:312, thumbnail_url:'https://picsum.photos/seed/cyber/400/700',  image_url:'https://picsum.photos/seed/cyber/1920/1080'  },
+    { id:'4', title:'Deep Space',        category:'Space',    resolution:'4K', is_featured:false, likes_count:98,  thumbnail_url:'https://picsum.photos/seed/space/400/700',  image_url:'https://picsum.photos/seed/space/1920/1080'  },
+    { id:'5', title:'Demon Slayer',      category:'Anime',    resolution:'HD', is_featured:false, likes_count:421, thumbnail_url:'https://picsum.photos/seed/demon/400/700',  image_url:'https://picsum.photos/seed/demon/1920/1080'  },
+    { id:'6', title:'Minecraft Sunset',  category:'Gaming',   resolution:'2K', is_featured:false, likes_count:156, thumbnail_url:'https://picsum.photos/seed/mine/400/700',   image_url:'https://picsum.photos/seed/mine/1920/1080'   }
+  ];
+
+  renderWallpaperGrid(demoWallpapers, 'featuredGrid');
+</script>
+
+</body>
+</html>
