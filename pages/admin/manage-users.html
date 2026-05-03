@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Users — NeoWallz Admin</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="accessDenied" style="display:none;" class="access-denied">
+  <div class="ad-icon">🔒</div>
+  <h2>Access Denied</h2>
+  <a href="/index.html" class="btn btn-primary">Home pe jao</a>
+</div>
+
+<div class="admin-layout" id="adminLayout">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-logo">
+      <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link">
+        <span class="s-icon">📊</span> Dashboard
+      </a>
+      <a href="upload.html" class="sidebar-link">
+        <span class="s-icon">⬆️</span> Upload Wallpaper
+      </a>
+      <div class="sidebar-section-label">Manage</div>
+      <a href="manage-wallpapers.html" class="sidebar-link">
+        <span class="s-icon">🖼️</span> Wallpapers
+      </a>
+      <a href="manage-categories.html" class="sidebar-link">
+        <span class="s-icon">🗂️</span> Categories
+      </a>
+      <a href="manage-users.html" class="sidebar-link active">
+        <span class="s-icon">👥</span> Users
+      </a>
+      <div class="sidebar-section-label">Site</div>
+      <a href="/index.html" class="sidebar-link">
+        <span class="s-icon">🌐</span> View Site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+          <div class="sidebar-user-role">👑 Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"
+       onclick="toggleSidebar()"></div>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="admin-menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span class="admin-page-title">👥 Manage Users</span>
+      </div>
+      <div class="admin-topbar-right">
+        <span id="userCountLabel"
+              style="color:var(--text-muted);font-size:13px;">
+          — users
+        </span>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- Alert -->
+      <div class="admin-alert" id="userAlert"></div>
+
+      <!-- Search -->
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+        <div class="admin-search">
+          <span>🔍</span>
+          <input type="text" id="userSearch"
+                 placeholder="Email ya username search karo..."
+                 oninput="filterUsers()" />
+        </div>
+        <select class="form-select" id="roleFilter"
+                onchange="filterUsers()" style="width:auto;">
+          <option value="">All Roles</option>
+          <option value="user">Users</option>
+          <option value="admin">Admins</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="admin-table-wrap">
+        <div class="admin-table-scroll">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="6" style="text-align:center;
+                    padding:40px;color:var(--text-muted);">
+                  Loading...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../../js/supabase.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/admin.js"></script>
+<script>
+
+let allUsers = [];
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await requireAdmin();
+  if (!ok) return;
+  await loadUsers();
+});
+
+async function loadUsers() {
+  const supabase = window._supabase;
+  const tbody = document.getElementById('usersTableBody');
+
+  try {
+    // Supabase Auth users load karo
+    // Note: Admin API chahiye — service_role key se
+    // Abhi ke liye demo data use karo
+    throw new Error('Use demo');
+
+  } catch {
+    // Demo users
+    allUsers = [
+      { id:'1', email:'admin@neowallz.com',  username:'Admin',    role:'admin', created_at:'2025-01-01T00:00:00Z' },
+      { id:'2', email:'user1@gmail.com',     username:'narutoFan', role:'user', created_at:'2025-02-15T00:00:00Z' },
+      { id:'3', email:'gamer99@gmail.com',   username:'gamer99',  role:'user',  created_at:'2025-03-10T00:00:00Z' },
+      { id:'4', email:'animelover@yahoo.com',username:'animeLvr', role:'user',  created_at:'2025-04-01T00:00:00Z' },
+      { id:'5', email:'techuser@hotmail.com',username:'techUser', role:'user',  created_at:'2025-04-20T00:00:00Z' },
+    ];
+  }
+
+  renderUsersTable(allUsers);
+}
+
+function renderUsersTable(users) {
+  const tbody = document.getElementById('usersTableBody');
+  document.getElementById('userCountLabel').textContent =
+    `${users.length} users`;
+
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="6"
+      style="text-align:center;padding:40px;color:var(--text-muted);">
+      Koi user nahi</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td>
+        <div style="
+          width:36px;height:36px;border-radius:50%;
+          background:linear-gradient(135deg,var(--color-purple),var(--color-cyan));
+          display:flex;align-items:center;justify-content:center;
+          font-family:var(--font-heading);font-size:14px;
+          font-weight:700;color:white;">
+          ${(u.username || u.email || 'U')[0].toUpperCase()}
+        </div>
+      </td>
+      <td>
+        <div style="font-family:var(--font-sub-heading);
+                    font-weight:600;color:var(--text-primary);">
+          ${u.username || 'N/A'}
+        </div>
+      </td>
+      <td style="color:var(--text-secondary);font-size:13px;">
+        ${u.email}
+      </td>
+      <td>
+        <span class="badge ${u.role === 'admin'
+          ? 'badge-pink' : 'badge-gray'}">
+          ${u.role === 'admin' ? '👑 Admin' : '👤 User'}
+        </span>
+      </td>
+      <td style="font-size:13px;color:var(--text-muted);">
+        ${new Date(u.created_at).toLocaleDateString('en-IN', {
+          day:'numeric', month:'short', year:'numeric'
+        })}
+      </td>
+      <td>
+        <div class="action-btns">
+          ${u.role !== 'admin'
+            ? `<button class="action-btn toggle"
+                       onclick="makeAdmin('${u.id}','${u.username || u.email}')">
+                 👑 Make Admin
+               </button>`
+            : `<button class="action-btn"
+                       onclick="removeAdmin('${u.id}','${u.username || u.email}')">
+                 ↓ Remove Admin
+               </button>`
+          }
+          <button class="action-btn delete"
+                  onclick="banUser('${u.id}','${u.username || u.email}')">
+            🚫 Ban
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers() {
+  const q    = document.getElementById('userSearch').value.toLowerCase();
+  const role = document.getElementById('roleFilter').value;
+
+  const filtered = allUsers.filter(u => {
+    const matchQ = !q ||
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.username || '').toLowerCase().includes(q);
+    const matchRole = !role || u.role === role;
+    return matchQ && matchRole;
+  });
+
+  renderUsersTable(filtered);
+}
+
+function makeAdmin(id, name) {
+  confirmDelete(
+    `"${name}" ko Admin banana chahte ho?`,
+    async () => {
+      const u = allUsers.find(u => u.id === id);
+      if (u) u.role = 'admin';
+      renderUsersTable(allUsers);
+      showAdminAlert('userAlert',
+        `"${name}" ab Admin hai!`, 'success');
+    }
+  );
+}
+
+function removeAdmin(id, name) {
+  confirmDelete(
+    `"${name}" ka Admin role hatana chahte ho?`,
+    async () => {
+      const u = allUsers.find(u => u.id === id);
+      if (u) u.role = 'user';
+      renderUsersTable(allUsers);
+      showAdminAlert('userAlert',
+        `"${name}" ka Admin role hata diya gaya!`, 'success');
+    }
+  );
+}
+
+function banUser(id, name) {
+  confirmDelete(
+    `"${name}" ko ban karna chahte ho?`,
+    async () => {
+      allUsers = allUsers.filter(u => u.id !== id);
+      renderUsersTable(allUsers);
+      showAdminAlert('userAlert',
+        `"${name}" ko ban kar diya gaya!`, 'success');
+    }
+  );
+}
+
+</script>
+</body>
+</html>

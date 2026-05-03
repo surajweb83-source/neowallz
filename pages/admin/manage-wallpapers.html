@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Wallpapers — NeoWallz Admin</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="accessDenied" style="display:none;" class="access-denied">
+  <div class="ad-icon">🔒</div>
+  <h2>Access Denied</h2>
+  <a href="/index.html" class="btn btn-primary">Home pe jao</a>
+</div>
+
+<div class="admin-layout" id="adminLayout">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-logo">
+      <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link">
+        <span class="s-icon">📊</span> Dashboard
+      </a>
+      <a href="upload.html" class="sidebar-link">
+        <span class="s-icon">⬆️</span> Upload Wallpaper
+      </a>
+      <div class="sidebar-section-label">Manage</div>
+      <a href="manage-wallpapers.html" class="sidebar-link active">
+        <span class="s-icon">🖼️</span> Wallpapers
+      </a>
+      <a href="manage-categories.html" class="sidebar-link">
+        <span class="s-icon">🗂️</span> Categories
+      </a>
+      <a href="manage-users.html" class="sidebar-link">
+        <span class="s-icon">👥</span> Users
+      </a>
+      <div class="sidebar-section-label">Site</div>
+      <a href="/index.html" class="sidebar-link">
+        <span class="s-icon">🌐</span> View Site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+          <div class="sidebar-user-role">👑 Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"
+       onclick="toggleSidebar()"></div>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="admin-menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span class="admin-page-title">🖼️ Manage Wallpapers</span>
+      </div>
+      <div class="admin-topbar-right">
+        <a href="upload.html" class="btn btn-primary">
+          + Upload New
+        </a>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- Alert -->
+      <div class="admin-alert" id="manageAlert"></div>
+
+      <!-- Filters -->
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;
+                  align-items:center;">
+        <div class="admin-search">
+          <span>🔍</span>
+          <input type="text" id="wallSearch"
+                 placeholder="Title search karo..."
+                 oninput="filterWalls()" />
+        </div>
+        <select class="form-select" id="catFilter"
+                onchange="filterWalls()"
+                style="width:auto;">
+          <option value="">All Categories</option>
+          <option value="anime">Anime</option>
+          <option value="gaming">Gaming</option>
+          <option value="cyberpunk">Cyberpunk</option>
+          <option value="space">Space</option>
+          <option value="nature">Nature</option>
+          <option value="cars">Cars</option>
+          <option value="abstract">Abstract</option>
+          <option value="dark">Dark</option>
+          <option value="movies">Movies</option>
+        </select>
+        <select class="form-select" id="featuredFilter"
+                onchange="filterWalls()"
+                style="width:auto;">
+          <option value="">All</option>
+          <option value="true">Featured Only</option>
+          <option value="false">Not Featured</option>
+        </select>
+        <span style="margin-left:auto;color:var(--text-muted);font-size:13px;">
+          <span id="wallCount">0</span> wallpapers
+        </span>
+      </div>
+
+      <!-- Table -->
+      <div class="admin-table-wrap">
+        <div class="admin-table-scroll">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Preview</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Resolution</th>
+                <th>Downloads</th>
+                <th>Likes</th>
+                <th>Featured</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="wallsTableBody">
+              <tr>
+                <td colspan="8" style="text-align:center;
+                    padding:40px;color:var(--text-muted);">
+                  Loading...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../../js/supabase.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/admin.js"></script>
+<script>
+
+let allWalls = [];
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await requireAdmin();
+  if (!ok) return;
+  await loadWallpapers();
+});
+
+async function loadWallpapers() {
+  const supabase = window._supabase;
+  const tbody = document.getElementById('wallsTableBody');
+
+  tbody.innerHTML = `<tr><td colspan="8"
+    style="text-align:center;padding:40px;color:var(--text-muted);">
+    Loading...</td></tr>`;
+
+  try {
+    const { data, error } = await supabase
+      .from('wallpapers')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    allWalls = data || [];
+  } catch {
+    // Demo
+    allWalls = [
+      { id:'1', title:'Naruto Sage Mode',    category_id:'anime',    resolution:'4K', downloads_count:1200, likes_count:245, is_featured:true,  thumbnail_url:'https://picsum.photos/seed/naruto/44/58'  },
+      { id:'2', title:'Valorant Agents',     category_id:'gaming',   resolution:'2K', downloads_count:980,  likes_count:189, is_featured:false, thumbnail_url:'https://picsum.photos/seed/valo/44/58'    },
+      { id:'3', title:'Cyberpunk City',      category_id:'cyberpunk',resolution:'HD', downloads_count:1500, likes_count:312, is_featured:true,  thumbnail_url:'https://picsum.photos/seed/cyber/44/58'   },
+      { id:'4', title:'Deep Space Galaxy',   category_id:'space',    resolution:'4K', downloads_count:450,  likes_count:98,  is_featured:false, thumbnail_url:'https://picsum.photos/seed/space/44/58'   },
+      { id:'5', title:'Demon Slayer',        category_id:'anime',    resolution:'HD', downloads_count:2100, likes_count:421, is_featured:false, thumbnail_url:'https://picsum.photos/seed/demon/44/58'   },
+      { id:'6', title:'Minecraft Sunset',    category_id:'gaming',   resolution:'2K', downloads_count:780,  likes_count:156, is_featured:false, thumbnail_url:'https://picsum.photos/seed/mine/44/58'    },
+      { id:'7', title:'One Piece Luffy',     category_id:'anime',    resolution:'4K', downloads_count:2400, likes_count:534, is_featured:true,  thumbnail_url:'https://picsum.photos/seed/luffy/44/58'   },
+      { id:'8', title:'GTA VI Miami',        category_id:'gaming',   resolution:'4K', downloads_count:3100, likes_count:678, is_featured:false, thumbnail_url:'https://picsum.photos/seed/gta/44/58'     },
+    ];
+  }
+
+  renderTable(allWalls);
+}
+
+function renderTable(walls) {
+  const tbody = document.getElementById('wallsTableBody');
+  document.getElementById('wallCount').textContent = walls.length;
+
+  if (!walls.length) {
+    tbody.innerHTML = `<tr><td colspan="8"
+      style="text-align:center;padding:40px;color:var(--text-muted);">
+      Koi wallpaper nahi</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = walls.map(w => `
+    <tr>
+      <td>
+        <img class="admin-table-thumb"
+             src="${w.thumbnail_url}" alt="${w.title}" />
+      </td>
+      <td>
+        <div class="admin-table-title-cell">${w.title}</div>
+      </td>
+      <td>
+        <span class="badge badge-purple">
+          ${w.category_id || 'N/A'}
+        </span>
+      </td>
+      <td>
+        <span class="badge badge-cyan">${w.resolution || 'HD'}</span>
+      </td>
+      <td>${formatNum(w.downloads_count || 0)}</td>
+      <td>❤️ ${w.likes_count || 0}</td>
+      <td>
+        <button class="action-btn toggle"
+                onclick="toggleFeat('${w.id}', ${w.is_featured})">
+          ${w.is_featured ? '⭐ Yes' : '☆ No'}
+        </button>
+      </td>
+      <td>
+        <div class="action-btns">
+          <a href="/pages/wallpaper-detail.html?id=${w.id}"
+             class="action-btn" target="_blank">👁️</a>
+          <button class="action-btn delete"
+                  onclick="deleteWall('${w.id}', '${w.title}')">
+            🗑️ Delete
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterWalls() {
+  const q       = document.getElementById('wallSearch').value.toLowerCase();
+  const cat     = document.getElementById('catFilter').value;
+  const feat    = document.getElementById('featuredFilter').value;
+
+  const filtered = allWalls.filter(w => {
+    const matchQ    = !q || w.title.toLowerCase().includes(q);
+    const matchCat  = !cat || w.category_id === cat;
+    const matchFeat = feat === ''
+      ? true
+      : feat === 'true'
+        ? w.is_featured
+        : !w.is_featured;
+    return matchQ && matchCat && matchFeat;
+  });
+
+  renderTable(filtered);
+}
+
+async function toggleFeat(id, current) {
+  try {
+    await toggleFeatured(id, current);
+    const wall = allWalls.find(w => w.id === id);
+    if (wall) wall.is_featured = !current;
+    filterWalls();
+    showAdminAlert('manageAlert',
+      `Featured status update ho gaya!`, 'success');
+  } catch {
+    showAdminAlert('manageAlert', 'Update fail hua!');
+  }
+}
+
+async function deleteWall(id, title) {
+  confirmDelete(`"${title}" delete karna chahte ho?`, async () => {
+    try {
+      await deleteWallpaper(id);
+      allWalls = allWalls.filter(w => w.id !== id);
+      filterWalls();
+      showAdminAlert('manageAlert',
+        `"${title}" delete ho gaya!`, 'success');
+    } catch {
+      showAdminAlert('manageAlert', 'Delete fail hua!');
+    }
+  });
+}
+
+</script>
+</body>
+</html>

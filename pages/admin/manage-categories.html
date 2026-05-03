@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Categories — NeoWallz Admin</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="accessDenied" style="display:none;" class="access-denied">
+  <div class="ad-icon">🔒</div>
+  <h2>Access Denied</h2>
+  <a href="/index.html" class="btn btn-primary">Home pe jao</a>
+</div>
+
+<div class="admin-layout" id="adminLayout">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-logo">
+      <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link">
+        <span class="s-icon">📊</span> Dashboard
+      </a>
+      <a href="upload.html" class="sidebar-link">
+        <span class="s-icon">⬆️</span> Upload Wallpaper
+      </a>
+      <div class="sidebar-section-label">Manage</div>
+      <a href="manage-wallpapers.html" class="sidebar-link">
+        <span class="s-icon">🖼️</span> Wallpapers
+      </a>
+      <a href="manage-categories.html" class="sidebar-link active">
+        <span class="s-icon">🗂️</span> Categories
+      </a>
+      <a href="manage-users.html" class="sidebar-link">
+        <span class="s-icon">👥</span> Users
+      </a>
+      <div class="sidebar-section-label">Site</div>
+      <a href="/index.html" class="sidebar-link">
+        <span class="s-icon">🌐</span> View Site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+          <div class="sidebar-user-role">👑 Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"
+       onclick="toggleSidebar()"></div>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="admin-menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span class="admin-page-title">🗂️ Manage Categories</span>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;
+                  gap:24px;align-items:start;">
+
+        <!-- Categories List -->
+        <div class="admin-table-wrap">
+          <div class="admin-table-header">
+            <span class="admin-table-title">Current Categories</span>
+          </div>
+          <div class="admin-alert" id="catAlert"
+               style="margin:12px 16px 0;"></div>
+          <div class="admin-table-scroll">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Icon</th>
+                  <th>Name</th>
+                  <th>Slug</th>
+                  <th>Count</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="catsTableBody">
+                <tr>
+                  <td colspan="5" style="text-align:center;
+                      padding:30px;color:var(--text-muted);">
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Category Form -->
+        <div class="upload-card">
+          <h2>➕ Naya Category Add Karo</h2>
+          <div class="admin-alert" id="addCatAlert"></div>
+
+          <div class="form-group">
+            <label class="form-label">Category Name *</label>
+            <input class="form-input" type="text" id="catName"
+                   placeholder="e.g. Anime" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Slug *</label>
+            <input class="form-input" type="text" id="catSlug"
+                   placeholder="e.g. anime (lowercase)" />
+            <p class="form-hint">
+              URL mein use hoga — lowercase, no spaces
+            </p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Icon (Emoji)</label>
+            <input class="form-input" type="text" id="catIcon"
+                   placeholder="e.g. ⛩️" maxlength="4" />
+          </div>
+
+          <button class="upload-submit-btn" onclick="addCategory()">
+            ➕ Category Add Karo
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/supabase.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/admin.js"></script>
+<script>
+
+// Demo categories
+const demoCats = [
+  { id:'1', name:'Anime',          slug:'anime',     icon:'⛩️', wallpaper_count:2400 },
+  { id:'2', name:'Gaming',         slug:'gaming',    icon:'🎮', wallpaper_count:1800 },
+  { id:'3', name:'Cyberpunk/Neon', slug:'cyberpunk', icon:'🌆', wallpaper_count:950  },
+  { id:'4', name:'Space & Cosmos', slug:'space',     icon:'🚀', wallpaper_count:700  },
+  { id:'5', name:'Nature',         slug:'nature',    icon:'🌿', wallpaper_count:600  },
+  { id:'6', name:'Cars & Bikes',   slug:'cars',      icon:'🚗', wallpaper_count:500  },
+  { id:'7', name:'Abstract & Art', slug:'abstract',  icon:'🎨', wallpaper_count:800  },
+  { id:'8', name:'Dark/Minimal',   slug:'dark',      icon:'🌑', wallpaper_count:650  },
+  { id:'9', name:'Movies & TV',    slug:'movies',    icon:'🎬', wallpaper_count:400  },
+];
+
+let categories = [...demoCats];
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await requireAdmin();
+  if (!ok) return;
+  await loadCategories();
+
+  // Auto-slug
+  document.getElementById('catName').addEventListener('input', (e) => {
+    document.getElementById('catSlug').value =
+      e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  });
+});
+
+async function loadCategories() {
+  const supabase = window._supabase;
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+    if (error) throw error;
+    categories = data || demoCats;
+  } catch {
+    categories = demoCats;
+  }
+  renderCatsTable();
+}
+
+function renderCatsTable() {
+  const tbody = document.getElementById('catsTableBody');
+  if (!categories.length) {
+    tbody.innerHTML = `<tr><td colspan="5"
+      style="text-align:center;padding:30px;color:var(--text-muted);">
+      Koi category nahi</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = categories.map(c => `
+    <tr>
+      <td style="font-size:1.4rem;">${c.icon || '📁'}</td>
+      <td>
+        <div style="font-family:var(--font-sub-heading);
+                    font-weight:600;color:var(--text-primary);">
+          ${c.name}
+        </div>
+      </td>
+      <td>
+        <span class="badge badge-gray">${c.slug}</span>
+      </td>
+      <td>
+        <span class="badge badge-cyan">${c.wallpaper_count || 0}</span>
+      </td>
+      <td>
+        <button class="action-btn delete"
+                onclick="deleteCat('${c.id}','${c.name}')">
+          🗑️
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function addCategory() {
+  const name = document.getElementById('catName').value.trim();
+  const slug = document.getElementById('catSlug').value.trim();
+  const icon = document.getElementById('catIcon').value.trim();
+
+  if (!name || !slug) {
+    showAdminAlert('addCatAlert', 'Name aur slug bharo!');
+    return;
+  }
+
+  const supabase = window._supabase;
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .insert({ name, slug, icon, wallpaper_count: 0 })
+      .select()
+      .single();
+    if (error) throw error;
+    categories.push(data);
+    showAdminAlert('addCatAlert',
+      `"${name}" add ho gaya!`, 'success');
+  } catch {
+    // Demo mode
+    categories.push({
+      id: Date.now().toString(), name, slug, icon, wallpaper_count: 0
+    });
+    showAdminAlert('addCatAlert',
+      `"${name}" add ho gaya! (Demo mode)`, 'success');
+  }
+
+  document.getElementById('catName').value = '';
+  document.getElementById('catSlug').value = '';
+  document.getElementById('catIcon').value = '';
+  renderCatsTable();
+}
+
+async function deleteCat(id, name) {
+  confirmDelete(`"${name}" category delete karna chahte ho?`, async () => {
+    const supabase = window._supabase;
+    try {
+      await supabase.from('categories').delete().eq('id', id);
+    } catch {}
+    categories = categories.filter(c => c.id !== id);
+    renderCatsTable();
+    showAdminAlert('catAlert', `"${name}" delete ho gaya!`, 'success');
+  });
+}
+
+</script>
+</body>
+</html>

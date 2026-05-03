@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — NeoWallz</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- Access Denied (hidden by default) -->
+<div id="accessDenied" style="display:none;" class="access-denied">
+  <div class="ad-icon">🔒</div>
+  <h2>Access Denied</h2>
+  <p>Ye page sirf admins ke liye hai</p>
+  <a href="/index.html" class="btn btn-primary">Home pe jao</a>
+</div>
+
+<!-- Admin Layout -->
+<div class="admin-layout" id="adminLayout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-logo">
+      <a href="/index.html" class="logo">
+        Neo<span class="text-purple">Wallz</span>
+      </a>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link active">
+        <span class="s-icon">📊</span> Dashboard
+      </a>
+      <a href="upload.html" class="sidebar-link">
+        <span class="s-icon">⬆️</span> Upload Wallpaper
+      </a>
+
+      <div class="sidebar-section-label">Manage</div>
+      <a href="manage-wallpapers.html" class="sidebar-link">
+        <span class="s-icon">🖼️</span> Wallpapers
+      </a>
+      <a href="manage-categories.html" class="sidebar-link">
+        <span class="s-icon">🗂️</span> Categories
+      </a>
+      <a href="manage-users.html" class="sidebar-link">
+        <span class="s-icon">👥</span> Users
+      </a>
+
+      <div class="sidebar-section-label">Site</div>
+      <a href="/index.html" class="sidebar-link">
+        <span class="s-icon">🌐</span> View Site
+      </a>
+      <a href="/pages/profile.html" class="sidebar-link">
+        <span class="s-icon">👤</span> My Profile
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+          <div class="sidebar-user-role">👑 Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"
+       onclick="toggleSidebar()"></div>
+
+  <!-- Main -->
+  <div class="admin-main">
+
+    <!-- Topbar -->
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="admin-menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span class="admin-page-title">📊 Dashboard</span>
+      </div>
+      <div class="admin-topbar-right">
+        <a href="upload.html" class="btn btn-primary">
+          + Upload Wallpaper
+        </a>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="admin-content">
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <div class="stat-card-icon">🖼️</div>
+            <span class="stat-card-change up">+12%</span>
+          </div>
+          <span class="stat-card-num" id="totalWallpapers">—</span>
+          <div class="stat-card-label">Total Wallpapers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <div class="stat-card-icon">⬇️</div>
+            <span class="stat-card-change up">+8%</span>
+          </div>
+          <span class="stat-card-num" id="totalDownloads">—</span>
+          <div class="stat-card-label">Total Downloads</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <div class="stat-card-icon">👥</div>
+            <span class="stat-card-change up">+5%</span>
+          </div>
+          <span class="stat-card-num" id="totalUsers">—</span>
+          <div class="stat-card-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <div class="stat-card-icon">❤️</div>
+            <span class="stat-card-change up">+15%</span>
+          </div>
+          <span class="stat-card-num" id="totalLikes">—</span>
+          <div class="stat-card-label">Total Likes</div>
+        </div>
+      </div>
+
+      <!-- Recent Wallpapers Table -->
+      <div class="admin-table-wrap" style="margin-bottom:24px;">
+        <div class="admin-table-header">
+          <span class="admin-table-title">🆕 Recent Wallpapers</span>
+          <a href="manage-wallpapers.html" class="btn btn-outline"
+             style="font-size:13px;padding:7px 16px;">
+            Sab dekho →
+          </a>
+        </div>
+        <div class="admin-table-scroll">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Preview</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Resolution</th>
+                <th>Downloads</th>
+                <th>Likes</th>
+                <th>Featured</th>
+              </tr>
+            </thead>
+            <tbody id="recentWallsBody">
+              <tr>
+                <td colspan="7" style="text-align:center;
+                    padding:30px;color:var(--text-muted);">
+                  Loading...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);
+                  gap:16px;">
+        <a href="upload.html"
+           style="background:var(--bg-secondary);
+                  border:1px solid var(--border-color);
+                  border-radius:var(--radius-md);
+                  padding:24px;text-align:center;
+                  text-decoration:none;transition:var(--transition);"
+           onmouseover="this.style.borderColor='var(--color-purple)'"
+           onmouseout="this.style.borderColor='var(--border-color)'">
+          <div style="font-size:2rem;margin-bottom:8px;">⬆️</div>
+          <div style="font-family:var(--font-sub-heading);
+                      font-weight:600;color:var(--text-primary);">
+            Upload
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">
+            Naya wallpaper add karo
+          </div>
+        </a>
+        <a href="manage-categories.html"
+           style="background:var(--bg-secondary);
+                  border:1px solid var(--border-color);
+                  border-radius:var(--radius-md);
+                  padding:24px;text-align:center;
+                  text-decoration:none;transition:var(--transition);"
+           onmouseover="this.style.borderColor='var(--color-cyan)'"
+           onmouseout="this.style.borderColor='var(--border-color)'">
+          <div style="font-size:2rem;margin-bottom:8px;">🗂️</div>
+          <div style="font-family:var(--font-sub-heading);
+                      font-weight:600;color:var(--text-primary);">
+            Categories
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">
+            Categories manage karo
+          </div>
+        </a>
+        <a href="manage-users.html"
+           style="background:var(--bg-secondary);
+                  border:1px solid var(--border-color);
+                  border-radius:var(--radius-md);
+                  padding:24px;text-align:center;
+                  text-decoration:none;transition:var(--transition);"
+           onmouseover="this.style.borderColor='var(--color-pink)'"
+           onmouseout="this.style.borderColor='var(--border-color)'">
+          <div style="font-size:2rem;margin-bottom:8px;">👥</div>
+          <div style="font-family:var(--font-sub-heading);
+                      font-weight:600;color:var(--text-primary);">
+            Users
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">
+            Users manage karo
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../../js/supabase.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/admin.js"></script>
+<script>
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await requireAdmin();
+  if (!ok) return;
+  await loadDashboardStats();
+  await loadRecentWallpapers();
+});
+
+async function loadDashboardStats() {
+  const supabase = window._supabase;
+  try {
+    const [walls, downloads, users, likes] = await Promise.all([
+      supabase.from('wallpapers').select('id', {count:'exact',head:true}),
+      supabase.from('downloads').select('id', {count:'exact',head:true}),
+      supabase.from('users').select('id', {count:'exact',head:true}),
+      supabase.from('likes').select('id', {count:'exact',head:true})
+    ]);
+
+    document.getElementById('totalWallpapers').textContent =
+      formatNum(walls.count || 0);
+    document.getElementById('totalDownloads').textContent =
+      formatNum(downloads.count || 0);
+    document.getElementById('totalUsers').textContent =
+      formatNum(users.count || 0);
+    document.getElementById('totalLikes').textContent =
+      formatNum(likes.count || 0);
+  } catch {
+    // Demo stats
+    document.getElementById('totalWallpapers').textContent = '9,241';
+    document.getElementById('totalDownloads').textContent = '54.2K';
+    document.getElementById('totalUsers').textContent = '1,830';
+    document.getElementById('totalLikes').textContent = '28.4K';
+  }
+}
+
+async function loadRecentWallpapers() {
+  const supabase = window._supabase;
+  const tbody = document.getElementById('recentWallsBody');
+
+  try {
+    const { data, error } = await supabase
+      .from('wallpapers')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+    renderRecentTable(data || []);
+  } catch {
+    // Demo data
+    renderRecentTable([
+      { id:'1', title:'Naruto Sage Mode',    category_id:'anime',    resolution:'4K', downloads_count:1200, likes_count:245, is_featured:true,  thumbnail_url:'https://picsum.photos/seed/naruto/44/58'  },
+      { id:'2', title:'Valorant Agents',     category_id:'gaming',   resolution:'2K', downloads_count:980,  likes_count:189, is_featured:false, thumbnail_url:'https://picsum.photos/seed/valo/44/58'    },
+      { id:'3', title:'Cyberpunk City',      category_id:'cyberpunk',resolution:'HD', downloads_count:1500, likes_count:312, is_featured:true,  thumbnail_url:'https://picsum.photos/seed/cyber/44/58'   },
+      { id:'4', title:'Deep Space Galaxy',   category_id:'space',    resolution:'4K', downloads_count:450,  likes_count:98,  is_featured:false, thumbnail_url:'https://picsum.photos/seed/space/44/58'   },
+      { id:'5', title:'Demon Slayer',        category_id:'anime',    resolution:'HD', downloads_count:2100, likes_count:421, is_featured:false, thumbnail_url:'https://picsum.photos/seed/demon/44/58'   },
+    ]);
+  }
+}
+
+function renderRecentTable(walls) {
+  const tbody = document.getElementById('recentWallsBody');
+  if (!walls.length) {
+    tbody.innerHTML = `<tr><td colspan="7"
+      style="text-align:center;padding:30px;color:var(--text-muted);">
+      Koi wallpaper nahi</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = walls.map(w => `
+    <tr>
+      <td>
+        <img class="admin-table-thumb"
+             src="${w.thumbnail_url}" alt="${w.title}" />
+      </td>
+      <td>
+        <div class="admin-table-title-cell">${w.title}</div>
+      </td>
+      <td>
+        <span class="badge badge-purple">
+          ${w.category_id || 'N/A'}
+        </span>
+      </td>
+      <td>
+        <span class="badge badge-cyan">${w.resolution || 'HD'}</span>
+      </td>
+      <td>${formatNum(w.downloads_count || 0)}</td>
+      <td>❤️ ${w.likes_count || 0}</td>
+      <td>
+        <span class="badge ${w.is_featured ? 'badge-green' : 'badge-gray'}">
+          ${w.is_featured ? '⭐ Yes' : 'No'}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+</script>
+</body>
+</html>

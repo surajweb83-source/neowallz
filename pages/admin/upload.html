@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Wallpaper — NeoWallz Admin</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="accessDenied" style="display:none;" class="access-denied">
+  <div class="ad-icon">🔒</div>
+  <h2>Access Denied</h2>
+  <p>Ye page sirf admins ke liye hai</p>
+  <a href="/index.html" class="btn btn-primary">Home pe jao</a>
+</div>
+
+<div class="admin-layout" id="adminLayout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-logo">
+      <a href="/index.html" class="logo">
+        Neo<span class="text-purple">Wallz</span>
+      </a>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link">
+        <span class="s-icon">📊</span> Dashboard
+      </a>
+      <a href="upload.html" class="sidebar-link active">
+        <span class="s-icon">⬆️</span> Upload Wallpaper
+      </a>
+      <div class="sidebar-section-label">Manage</div>
+      <a href="manage-wallpapers.html" class="sidebar-link">
+        <span class="s-icon">🖼️</span> Wallpapers
+      </a>
+      <a href="manage-categories.html" class="sidebar-link">
+        <span class="s-icon">🗂️</span> Categories
+      </a>
+      <a href="manage-users.html" class="sidebar-link">
+        <span class="s-icon">👥</span> Users
+      </a>
+      <div class="sidebar-section-label">Site</div>
+      <a href="/index.html" class="sidebar-link">
+        <span class="s-icon">🌐</span> View Site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+          <div class="sidebar-user-role">👑 Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"
+       onclick="toggleSidebar()"></div>
+
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="admin-menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span class="admin-page-title">⬆️ Upload Wallpaper</span>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <div class="upload-card">
+        <h2>⬆️ Naya Wallpaper Upload Karo</h2>
+
+        <!-- Alert -->
+        <div class="admin-alert" id="uploadAlert"></div>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="wallpaperFile"
+                 accept="image/*" onchange="onFileSelect(this)" />
+          <div id="dropZoneContent">
+            <div class="drop-zone-icon">🖼️</div>
+            <div class="drop-zone-text">
+              Image drag karo ya click karke select karo
+            </div>
+            <div class="drop-zone-sub">
+              JPG, PNG, WEBP — Max 10MB
+            </div>
+          </div>
+          <div class="drop-zone-preview" id="dropZonePreview">
+            <img id="previewImg" src="" alt="Preview" />
+            <p style="color:var(--text-muted);font-size:13px;
+                      margin-top:8px;" id="previewFileName"></p>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Title *</label>
+            <input class="form-input" type="text" id="wallTitle"
+                   placeholder="e.g. Naruto Sage Mode"
+                   maxlength="100" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-select" id="wallCategory">
+              <option value="">-- Select --</option>
+              <option value="anime">Anime</option>
+              <option value="gaming">Gaming</option>
+              <option value="cyberpunk">Cyberpunk / Neon</option>
+              <option value="space">Space & Cosmos</option>
+              <option value="nature">Nature</option>
+              <option value="cars">Cars & Bikes</option>
+              <option value="abstract">Abstract & Art</option>
+              <option value="dark">Dark / Minimal</option>
+              <option value="movies">Movies & TV</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Resolution *</label>
+            <select class="form-select" id="wallResolution">
+              <option value="HD">HD (1920×1080)</option>
+              <option value="2K">2K (2560×1440)</option>
+              <option value="4K">4K (3840×2160)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Device Type</label>
+            <select class="form-select" id="wallDevice">
+              <option value="all">All Devices</option>
+              <option value="mobile">Mobile</option>
+              <option value="desktop">Desktop</option>
+              <option value="tablet">Tablet</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-textarea" id="wallDesc"
+                    placeholder="Wallpaper ke baare mein kuch likho..."
+                    maxlength="300"></textarea>
+        </div>
+
+        <!-- Tags input -->
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <div class="tags-input-wrap" id="tagsInputWrap"
+               onclick="document.getElementById('tagsInput').focus()">
+            <input type="text" class="tags-real-input"
+                   id="tagsInput"
+                   placeholder="Tag likho aur Enter dabao..." />
+          </div>
+          <input type="hidden" id="tagsInputHidden" value="[]" />
+          <p class="form-hint">
+            Enter ya comma dabao tag add karne ke liye
+          </p>
+        </div>
+
+        <!-- Featured toggle -->
+        <div class="form-group">
+          <label class="form-label">Featured</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="wallFeatured" />
+            <div class="toggle-track"></div>
+            <span class="toggle-label">
+              Homepage pe featured dikhao
+            </span>
+          </label>
+        </div>
+
+        <!-- Progress -->
+        <div class="upload-progress" id="uploadProgress">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="progress-text" id="progressText">
+            Uploading... 0%
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button class="upload-submit-btn" id="uploadBtn"
+                onclick="handleUpload()">
+          <div class="btn-spinner" id="uploadSpinner"></div>
+          <span id="uploadBtnText">⬆️ Wallpaper Upload Karo</span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/supabase.js"></script>
+<script src="../../js/main.js"></script>
+<script src="../../js/admin.js"></script>
+<script>
+
+let selectedFile = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const ok = await requireAdmin();
+  if (!ok) return;
+  setupTagsInput('tagsInput', 'tagsInputWrap');
+  setupDropZone();
+});
+
+function setupDropZone() {
+  const zone = document.getElementById('dropZone');
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', () => {
+    zone.classList.remove('drag-over');
+  });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      processFile(file);
+    }
+  });
+}
+
+function onFileSelect(input) {
+  if (input.files[0]) processFile(input.files[0]);
+}
+
+function processFile(file) {
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('previewFileName').textContent =
+      `${file.name} (${(file.size/1024/1024).toFixed(1)} MB)`;
+    document.getElementById('dropZoneContent').style.display = 'none';
+    document.getElementById('dropZonePreview').classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function handleUpload() {
+  const title      = document.getElementById('wallTitle').value.trim();
+  const category   = document.getElementById('wallCategory').value;
+  const resolution = document.getElementById('wallResolution').value;
+  const device     = document.getElementById('wallDevice').value;
+  const desc       = document.getElementById('wallDesc').value.trim();
+  const featured   = document.getElementById('wallFeatured').checked;
+  const tagsRaw    = document.getElementById('tagsInputHidden').value;
+
+  // Validations
+  if (!selectedFile) {
+    showAdminAlert('uploadAlert', 'Pehle image select karo!');
+    return;
+  }
+  if (!title) {
+    showAdminAlert('uploadAlert', 'Title bharo!');
+    return;
+  }
+  if (!category) {
+    showAdminAlert('uploadAlert', 'Category select karo!');
+    return;
+  }
+  if (selectedFile.size > 10 * 1024 * 1024) {
+    showAdminAlert('uploadAlert', 'File 10MB se chhoti honi chahiye!');
+    return;
+  }
+
+  // Loading
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  document.getElementById('uploadSpinner').style.display = 'block';
+  document.getElementById('uploadBtnText').textContent = 'Upload ho raha hai...';
+  document.getElementById('uploadProgress').classList.add('show');
+
+  try {
+    // Step 1: Cloudinary pe upload karo
+    let imageUrl = '';
+    let thumbnailUrl = '';
+
+    try {
+      const result = await uploadToCloudinary(selectedFile, (pct) => {
+        document.getElementById('progressBar').style.width = pct + '%';
+        document.getElementById('progressText').textContent =
+          `Uploading... ${pct}%`;
+      });
+      imageUrl     = result.url;
+      thumbnailUrl = result.thumbnail_url;
+    } catch {
+      // Cloudinary setup nahi hai abhi — picsum use karo demo ke liye
+      imageUrl     = `https://picsum.photos/seed/${title.replace(/\s/g,'')}/1920/1080`;
+      thumbnailUrl = `https://picsum.photos/seed/${title.replace(/\s/g,'')}/400/700`;
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressText').textContent = 'Demo mode...';
+    }
+
+    document.getElementById('progressText').textContent =
+      'Database mein save ho raha hai...';
+
+    // Step 2: Supabase mein save karo
+    const tags = JSON.parse(tagsRaw || '[]');
+    const wallData = {
+      title,
+      description:   desc,
+      image_url:     imageUrl,
+      thumbnail_url: thumbnailUrl,
+      category_id:   category,
+      resolution,
+      device_type:   device,
+      is_featured:   featured,
+      likes_count:   0,
+      downloads_count: 0,
+      created_at:    new Date().toISOString()
+    };
+
+    try {
+      await saveWallpaperToDB(wallData);
+      showAdminAlert('uploadAlert',
+        `✅ "${title}" successfully upload ho gaya!`, 'success');
+    } catch {
+      showAdminAlert('uploadAlert',
+        'Supabase mein save nahi hua — table banao pehle!', 'error');
+    }
+
+    // Form reset karo
+    resetForm();
+
+  } catch (err) {
+    showAdminAlert('uploadAlert', 'Upload fail hua: ' + err.message);
+  }
+
+  btn.disabled = false;
+  document.getElementById('uploadSpinner').style.display = 'none';
+  document.getElementById('uploadBtnText').textContent =
+    '⬆️ Wallpaper Upload Karo';
+  document.getElementById('uploadProgress').classList.remove('show');
+}
+
+function resetForm() {
+  selectedFile = null;
+  document.getElementById('wallTitle').value     = '';
+  document.getElementById('wallCategory').value  = '';
+  document.getElementById('wallDesc').value      = '';
+  document.getElementById('wallFeatured').checked = false;
+  document.getElementById('tagsInputHidden').value = '[]';
+  document.getElementById('tagsInputWrap')
+    .querySelectorAll('.tag-pill').forEach(p => p.remove());
+  document.getElementById('dropZoneContent').style.display = 'block';
+  document.getElementById('dropZonePreview').classList.remove('show');
+  document.getElementById('progressBar').style.width = '0%';
+}
+
+</script>
+</body>
+</html>
