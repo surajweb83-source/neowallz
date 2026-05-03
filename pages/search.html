@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Wallpapers — NeoWallz</title>
+  <meta name="description" content="Search Anime, Gaming, Cyberpunk wallpapers on NeoWallz.">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <style>
+    /* ===== SEARCH PAGE EXTRA STYLES ===== */
+
+    .search-page-hero {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 40px 0 30px;
+    }
+
+    .search-page-title {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      margin-bottom: 20px;
+    }
+
+    /* Big search bar */
+    .search-bar-big {
+      display: flex;
+      align-items: center;
+      background: var(--bg-primary);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 8px 8px 8px 20px;
+      gap: 12px;
+      transition: var(--transition);
+      max-width: 700px;
+    }
+    .search-bar-big:focus-within {
+      border-color: var(--color-purple);
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
+    }
+    .search-bar-big input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-family: var(--font-body);
+    }
+    .search-bar-big input::placeholder {
+      color: var(--text-muted);
+    }
+    .search-bar-big .clear-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+      transition: var(--transition-fast);
+    }
+    .search-bar-big .clear-btn:hover {
+      color: var(--color-pink);
+    }
+    .search-bar-big .search-go-btn {
+      background: var(--color-purple);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      white-space: nowrap;
+    }
+    .search-bar-big .search-go-btn:hover {
+      background: var(--color-purple-light);
+    }
+
+    /* Popular tags row */
+    .search-tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+      align-items: center;
+    }
+    .search-tags-row .tag-label {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-right: 4px;
+    }
+    .search-tags-row .tag-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-body);
+    }
+    .search-tags-row .tag-btn:hover,
+    .search-tags-row .tag-btn.active {
+      border-color: var(--color-cyan);
+      color: var(--color-cyan);
+      background: rgba(6,182,212,0.08);
+    }
+
+    /* Filters bar */
+    .filters-bar {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+    .filters-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-label {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-family: var(--font-sub-heading);
+    }
+    .filter-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition-fast);
+    }
+    .filter-select:focus {
+      border-color: var(--color-purple);
+    }
+    .filter-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border-color);
+      margin: 0 4px;
+    }
+    .results-count {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .results-count span {
+      color: var(--color-cyan);
+      font-weight: 600;
+    }
+
+    /* Results section */
+    .results-section {
+      padding: 32px 0 60px;
+    }
+
+    /* No results */
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+    .no-results .no-results-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    .no-results h3 {
+      font-family: var(--font-sub-heading);
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-size: 1.3rem;
+    }
+    .no-results p {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* Live search dropdown */
+    .search-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      z-index: 500;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .search-dropdown.hidden { display: none; }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover {
+      background: var(--bg-hover);
+    }
+    .dropdown-item img {
+      width: 40px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .dropdown-item-info .d-title {
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+    }
+    .dropdown-item-info .d-cat {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .search-bar-wrapper {
+      position: relative;
+      max-width: 700px;
+    }
+
+    /* Keyboard shortcut hint */
+    .search-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    .kbd {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html" class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- SEARCH HERO -->
+<section class="search-page-hero">
+  <div class="container">
+    <h1 class="search-page-title">
+      🔍 Search <span class="text-purple">Wallpapers</span>
+    </h1>
+
+    <!-- Search bar with dropdown -->
+    <div class="search-bar-wrapper">
+      <div class="search-bar-big">
+        <span style="font-size:20px;">🔍</span>
+        <input
+          type="text"
+          id="mainSearch"
+          placeholder="Search anime, gaming, cyberpunk..."
+          autocomplete="off"
+        />
+        <button class="clear-btn" id="clearBtn" style="display:none;">✕</button>
+        <button class="search-go-btn" onclick="doSearch()">Search</button>
+      </div>
+
+      <!-- Live dropdown -->
+      <div class="search-dropdown hidden" id="searchDropdown"></div>
+    </div>
+
+    <!-- Keyboard hint -->
+    <div class="search-hint">
+      <span class="kbd">/</span> press karo search focus ke liye
+    </div>
+
+    <!-- Popular Tags -->
+    <div class="search-tags-row">
+      <span class="tag-label">🔥 Popular:</span>
+      <button class="tag-btn" onclick="setTag('Naruto')">Naruto</button>
+      <button class="tag-btn" onclick="setTag('Valorant')">Valorant</button>
+      <button class="tag-btn" onclick="setTag('Cyberpunk')">Cyberpunk</button>
+      <button class="tag-btn" onclick="setTag('4K')">4K</button>
+      <button class="tag-btn" onclick="setTag('Dark')">Dark</button>
+      <button class="tag-btn" onclick="setTag('Space')">Space</button>
+      <button class="tag-btn" onclick="setTag('One Piece')">One Piece</button>
+      <button class="tag-btn" onclick="setTag('GTA')">GTA</button>
+      <button class="tag-btn" onclick="setTag('Minimal')">Minimal</button>
+    </div>
+  </div>
+</section>
+
+<!-- FILTERS BAR -->
+<div class="filters-bar">
+  <div class="container filters-inner">
+    <span class="filter-label">Filter:</span>
+
+    <!-- Category filter -->
+    <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+      <option value="">All Categories</option>
+      <option value="anime">Anime</option>
+      <option value="gaming">Gaming</option>
+      <option value="cyberpunk">Cyberpunk</option>
+      <option value="space">Space</option>
+      <option value="nature">Nature</option>
+      <option value="cars">Cars & Bikes</option>
+      <option value="abstract">Abstract</option>
+      <option value="movies">Movies & TV</option>
+    </select>
+
+    <div class="filter-divider"></div>
+
+    <!-- Resolution filter -->
+    <select class="filter-select" id="resolutionFilter" onchange="applyFilters()">
+      <option value="">All Resolutions</option>
+      <option value="HD">HD</option>
+      <option value="2K">2K</option>
+      <option value="4K">4K</option>
+    </select>
+
+    <!-- Results count -->
+    <div class="results-count" id="resultsCount">
+      <span>0</span> results
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<section class="results-section">
+  <div class="container">
+    <div class="wallpaper-grid" id="searchGrid">
+      <!-- Results yahan aayenge -->
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Neo<span class="text-purple">Wallz</span></div>
+      <p>Best Anime & Gaming wallpapers — Free forever.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/pages/wallpapers.html">All Wallpapers</a></li>
+        <li><a href="/pages/category.html">Categories</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/pages/legal/privacy.html">Privacy</a></li>
+        <li><a href="/pages/legal/terms.html">Terms</a></li>
+        <li><a href="/pages/legal/contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="text-muted">© 2025 NeoWallz — All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- JS -->
+<script src="../js/main.js"></script>
+<script src="../js/wallpapers.js"></script>
+<script src="../js/search.js"></script>
+
+</body>
+</html>

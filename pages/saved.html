@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saved Collection — NeoWallz</title>
+  <meta name="description" content="Apni saved wallpapers collection dekho — NeoWallz">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    .saved-page { padding: 50px 0 80px; }
+
+    /* Page Header */
+    .page-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 40px 0 30px;
+      margin-bottom: 40px;
+    }
+    .page-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-header h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin-bottom: 6px;
+    }
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Stats row */
+    .saved-stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .saved-stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      text-align: center;
+      min-width: 100px;
+    }
+    .saved-stat-num {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      color: var(--color-purple-light);
+      display: block;
+    }
+    .saved-stat-label {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* Sort + Filter bar */
+    .saved-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .saved-sort-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 7px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-body);
+    }
+    .saved-sort-btn:hover,
+    .saved-sort-btn.active {
+      border-color: var(--color-cyan);
+      color: var(--color-cyan);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    .empty-state h3 {
+      font-family: var(--font-sub-heading);
+      color: var(--text-secondary);
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* Not logged in state */
+    .login-required {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .login-required .lr-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    .login-required h2 {
+      font-family: var(--font-sub-heading);
+      margin-bottom: 10px;
+    }
+    .login-required p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+
+    /* Remove from saved button on card overlay */
+    .remove-saved-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(239,68,68,0.8);
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+      z-index: 10;
+    }
+    .wall-card:hover .remove-saved-btn {
+      display: flex;
+    }
+    .remove-saved-btn:hover {
+      background: rgba(239,68,68,1);
+      transform: scale(1.1);
+    }
+
+    /* Loading state */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--color-purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html" class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container page-header-inner">
+    <div>
+      <h1>🔖 Meri <span class="text-cyan">Collection</span></h1>
+      <p>Tumhare saved wallpapers yahan hain</p>
+    </div>
+    <a href="/pages/wallpapers.html" class="btn btn-outline">
+      + Aur Wallpapers Dhundo
+    </a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="saved-page">
+  <div class="container">
+
+    <!-- Loading -->
+    <div class="loading-state" id="loadingState">
+      <div class="loading-spinner"></div>
+      <p>Collection load ho rahi hai...</p>
+    </div>
+
+    <!-- Not logged in -->
+    <div class="login-required" id="loginRequired" style="display:none;">
+      <div class="lr-icon">🔒</div>
+      <h2>Login karo apni collection dekhne ke liye</h2>
+      <p>Saved wallpapers dekhne ke liye pehle login karo</p>
+      <a href="/pages/login.html?redirect=/pages/saved.html"
+         class="btn btn-primary">
+        🔑 Login karo
+      </a>
+    </div>
+
+    <!-- Logged in content -->
+    <div id="savedContent" style="display:none;">
+
+      <!-- Stats -->
+      <div class="saved-stats">
+        <div class="saved-stat-card">
+          <span class="saved-stat-num" id="savedCount">0</span>
+          <div class="saved-stat-label">Saved</div>
+        </div>
+        <div class="saved-stat-card">
+          <span class="saved-stat-num" id="likedCount">0</span>
+          <div class="saved-stat-label">Liked</div>
+        </div>
+      </div>
+
+      <!-- Sort bar -->
+      <div class="saved-bar">
+        <span style="color:var(--text-muted);font-size:13px;">Sort:</span>
+        <button class="saved-sort-btn active"
+                onclick="sortSaved('newest', this)">🆕 Newest</button>
+        <button class="saved-sort-btn"
+                onclick="sortSaved('oldest', this)">📅 Oldest</button>
+      </div>
+
+      <!-- Grid -->
+      <div class="wallpaper-grid" id="savedGrid"></div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Neo<span class="text-purple">Wallz</span></div>
+      <p>Best Anime & Gaming wallpapers — Free forever.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/pages/wallpapers.html">All Wallpapers</a></li>
+        <li><a href="/pages/category.html">Categories</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="/pages/profile.html">My Profile</a></li>
+        <li><a href="/pages/downloads.html">Download History</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/pages/legal/privacy.html">Privacy</a></li>
+        <li><a href="/pages/legal/terms.html">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="text-muted">© 2025 NeoWallz — All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- JS -->
+<script src="../js/supabase.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/wallpapers.js"></script>
+<script>
+
+// ============================================
+//   SAVED PAGE JS
+// ============================================
+
+let savedWallpapers = [];
+let sortOrder = 'newest';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const supabase = window._supabase;
+  if (!supabase) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  document.getElementById('loadingState').style.display = 'none';
+
+  if (!session) {
+    document.getElementById('loginRequired').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('savedContent').style.display = 'block';
+  await loadSavedWallpapers(session.user.id);
+  await loadLikedCount(session.user.id);
+});
+
+// ---- Saved wallpapers load karo ----
+async function loadSavedWallpapers(userId) {
+  const supabase = window._supabase;
+
+  showSkeletons('savedGrid', 6);
+
+  try {
+    const { data, error } = await supabase
+      .from('saved_wallpapers')
+      .select(`
+        id,
+        created_at,
+        wallpapers (
+          id, title, thumbnail_url, image_url,
+          resolution, category_id, likes_count,
+          is_featured
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Data format karo
+    savedWallpapers = (data || [])
+      .filter(item => item.wallpapers)
+      .map(item => ({
+        ...item.wallpapers,
+        saved_at: item.created_at,
+        category: item.wallpapers.category_id || 'Wallpaper'
+      }));
+
+    document.getElementById('savedCount').textContent = savedWallpapers.length;
+
+    renderSavedGrid();
+
+  } catch (err) {
+    console.error('Saved load error:', err);
+    // Demo data dikhao agar Supabase tables nahi hain abhi
+    savedWallpapers = getDemoSaved();
+    document.getElementById('savedCount').textContent = savedWallpapers.length;
+    renderSavedGrid();
+  }
+}
+
+// ---- Liked count ----
+async function loadLikedCount(userId) {
+  const supabase = window._supabase;
+  try {
+    const { count } = await supabase
+      .from('likes')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    document.getElementById('likedCount').textContent = count || 0;
+  } catch {
+    document.getElementById('likedCount').textContent = '0';
+  }
+}
+
+// ---- Grid render karo with remove button ----
+function renderSavedGrid() {
+  const grid = document.getElementById('savedGrid');
+
+  if (savedWallpapers.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon">🔖</div>
+        <h3>Koi saved wallpaper nahi</h3>
+        <p>Wallpaper pe jaake 🔖 Save button dabao</p>
+        <a href="/pages/wallpapers.html" class="btn btn-primary">
+          Wallpapers Browse karo
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  // Sort karo
+  let sorted = [...savedWallpapers];
+  if (sortOrder === 'oldest') sorted.reverse();
+
+  grid.innerHTML = sorted.map(wall => `
+    <div class="wall-card fade-in" onclick="goToDetail('${wall.id}')">
+      <img src="${wall.thumbnail_url}" alt="${wall.title}" loading="lazy" />
+      <div class="wall-badge">${wall.resolution || 'HD'}</div>
+      <!-- Remove button -->
+      <button class="remove-saved-btn"
+              onclick="removeSaved(event, '${wall.id}')"
+              title="Collection se hatao">
+        ✕
+      </button>
+      <div class="wall-card-overlay">
+        <div class="wall-card-info">
+          <div class="wall-card-title">${wall.title}</div>
+          <div class="wall-card-category">${wall.category}</div>
+        </div>
+        <div class="wall-card-actions">
+          <button class="wall-action-btn like-btn liked"
+                  onclick="handleLike(event, '${wall.id}')"
+                  id="like-${wall.id}">
+            ❤️ ${wall.likes_count || 0}
+          </button>
+          <button class="wall-action-btn dl-btn"
+                  onclick="handleQuickDownload(event, '${wall.id}', '${wall.image_url}')"
+                  id="dl-${wall.id}">
+            <span class="dl-icon">⬇️</span> Save
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---- Remove from saved ----
+async function removeSaved(event, wallId) {
+  event.stopPropagation();
+
+  const supabase = window._supabase;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  try {
+    await supabase
+      .from('saved_wallpapers')
+      .delete()
+      .eq('user_id', session.user.id)
+      .eq('wallpaper_id', wallId);
+
+    // Local list se hatao
+    savedWallpapers = savedWallpapers.filter(w => w.id !== wallId);
+    document.getElementById('savedCount').textContent = savedWallpapers.length;
+    renderSavedGrid();
+
+  } catch (err) {
+    console.error('Remove error:', err);
+  }
+}
+
+// ---- Sort ----
+function sortSaved(order, btn) {
+  sortOrder = order;
+  document.querySelectorAll('.saved-sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSavedGrid();
+}
+
+// ---- Demo data (Supabase tables ready hone se pehle) ----
+function getDemoSaved() {
+  return [
+    { id:'1', title:'Naruto Sage Mode',    category:'Anime',    resolution:'4K', is_featured:true,  likes_count:245, thumbnail_url:'https://picsum.photos/seed/naruto/400/700',  image_url:'https://picsum.photos/seed/naruto/1920/1080'  },
+    { id:'3', title:'Cyberpunk City Night',category:'Cyberpunk',resolution:'HD', is_featured:true,  likes_count:312, thumbnail_url:'https://picsum.photos/seed/cyber/400/700',   image_url:'https://picsum.photos/seed/cyber/1920/1080'   },
+    { id:'7', title:'One Piece Luffy',     category:'Anime',    resolution:'2K', is_featured:true,  likes_count:534, thumbnail_url:'https://picsum.photos/seed/luffy/400/700',   image_url:'https://picsum.photos/seed/luffy/1920/1080'   },
+  ];
+}
+
+</script>
+
+</body>
+</html>

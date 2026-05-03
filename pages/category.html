@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Categories — NeoWallz</title>
+  <meta name="description" content="Browse Anime, Gaming, Cyberpunk, Space wallpaper categories on NeoWallz.">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <style>
+
+    /* ===== CATEGORY PAGE STYLES ===== */
+
+    /* Page Hero */
+    .cat-page-hero {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 50px 0 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cat-page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 50%, rgba(124,58,237,0.1) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 50%, rgba(6,182,212,0.08) 0%, transparent 60%);
+    }
+    .cat-page-hero .container {
+      position: relative;
+      z-index: 1;
+    }
+    .cat-page-hero h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      margin-bottom: 10px;
+    }
+    .cat-page-hero p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* ===== ALL CATEGORIES GRID ===== */
+    .all-cats-section {
+      padding: 50px 0;
+    }
+    .all-cats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .all-cats-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .all-cats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+
+    /* Big Category Card */
+    .big-cat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 30px 20px;
+      text-align: center;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+    .big-cat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .big-cat-card:hover::before { opacity: 1; }
+    .big-cat-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--card-glow, var(--color-purple));
+      box-shadow: 0 12px 30px var(--card-shadow, rgba(124,58,237,0.25));
+    }
+
+    /* Per-category colors */
+    .big-cat-card[data-cat="anime"]     { --card-glow: #ec4899; --card-shadow: rgba(236,72,153,0.25); }
+    .big-cat-card[data-cat="gaming"]    { --card-glow: #06b6d4; --card-shadow: rgba(6,182,212,0.25); }
+    .big-cat-card[data-cat="cyberpunk"] { --card-glow: #7c3aed; --card-shadow: rgba(124,58,237,0.25); }
+    .big-cat-card[data-cat="space"]     { --card-glow: #3b82f6; --card-shadow: rgba(59,130,246,0.25); }
+    .big-cat-card[data-cat="nature"]    { --card-glow: #22c55e; --card-shadow: rgba(34,197,94,0.25); }
+    .big-cat-card[data-cat="cars"]      { --card-glow: #f59e0b; --card-shadow: rgba(245,158,11,0.25); }
+    .big-cat-card[data-cat="abstract"]  { --card-glow: #ec4899; --card-shadow: rgba(236,72,153,0.25); }
+    .big-cat-card[data-cat="movies"]    { --card-glow: #f97316; --card-shadow: rgba(249,115,22,0.25); }
+    .big-cat-card[data-cat="dark"]      { --card-glow: #94a3b8; --card-shadow: rgba(148,163,184,0.25); }
+    .big-cat-card[data-cat="all"]       { --card-glow: #7c3aed; --card-shadow: rgba(124,58,237,0.3); }
+
+    .big-cat-icon {
+      font-size: 3rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .big-cat-name {
+      color: var(--text-primary);
+      font-family: var(--font-sub-heading);
+      font-weight: 700;
+      font-size: 17px;
+      margin-bottom: 6px;
+    }
+    .big-cat-count {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .big-cat-arrow {
+      display: inline-block;
+      margin-top: 14px;
+      color: var(--text-muted);
+      font-size: 13px;
+      transition: var(--transition-fast);
+    }
+    .big-cat-card:hover .big-cat-arrow {
+      color: var(--color-cyan);
+      transform: translateX(4px);
+    }
+
+    /* ===== SINGLE CATEGORY VIEW ===== */
+    .single-cat-section {
+      display: none;
+    }
+    .single-cat-section.active {
+      display: block;
+    }
+
+    /* Category header */
+    .cat-detail-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 40px 0 30px;
+    }
+    .cat-detail-top {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .cat-detail-icon {
+      font-size: 3.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cat-detail-info h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      margin-bottom: 6px;
+    }
+    .cat-detail-info p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .cat-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      margin-bottom: 20px;
+      transition: var(--transition-fast);
+      padding: 0;
+    }
+    .cat-back-btn:hover {
+      color: var(--color-cyan);
+    }
+
+    /* Sub-categories chips */
+    .subcats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .subcat-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-body);
+    }
+    .subcat-chip:hover,
+    .subcat-chip.active {
+      border-color: var(--color-purple);
+      color: var(--color-purple-light);
+      background: rgba(124,58,237,0.1);
+    }
+
+    /* Sort bar */
+    .sort-bar {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+    .sort-bar-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .sort-label {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .sort-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-body);
+    }
+    .sort-btn:hover,
+    .sort-btn.active {
+      border-color: var(--color-cyan);
+      color: var(--color-cyan);
+    }
+    .sort-count {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .sort-count span {
+      color: var(--color-cyan);
+      font-weight: 600;
+    }
+
+    /* Wallpapers in category */
+    .cat-wallpapers-section {
+      padding: 32px 0 60px;
+    }
+
+    /* Load more button */
+    .load-more-wrap {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .load-more-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--color-purple);
+      color: var(--color-purple-light);
+      padding: 12px 36px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sub-heading);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .load-more-btn:hover {
+      background: var(--color-purple);
+      color: white;
+      box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html" class="active">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html" class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== ALL CATEGORIES VIEW ===== -->
+<div id="allCatsView">
+
+  <!-- Hero -->
+  <section class="cat-page-hero">
+    <div class="container">
+      <h1>Browse <span class="text-cyan">Categories</span></h1>
+      <p>Apni pasand ki category chuno aur wallpapers explore karo</p>
+    </div>
+  </section>
+
+  <!-- All Categories Grid -->
+  <section class="all-cats-section">
+    <div class="container">
+      <div class="all-cats-grid" id="allCatsGrid">
+
+        <a class="big-cat-card fade-in" data-cat="all"
+           href="/pages/wallpapers.html">
+          <span class="big-cat-icon">🖼️</span>
+          <div class="big-cat-name">All Wallpapers</div>
+          <div class="big-cat-count">9,000+ wallpapers</div>
+          <span class="big-cat-arrow">Browse all →</span>
+        </a>
+
+        <div class="big-cat-card fade-in" data-cat="anime"
+             onclick="openCategory('anime')">
+          <span class="big-cat-icon">⛩️</span>
+          <div class="big-cat-name">Anime</div>
+          <div class="big-cat-count">2,400+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="gaming"
+             onclick="openCategory('gaming')">
+          <span class="big-cat-icon">🎮</span>
+          <div class="big-cat-name">Gaming</div>
+          <div class="big-cat-count">1,800+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="cyberpunk"
+             onclick="openCategory('cyberpunk')">
+          <span class="big-cat-icon">🌆</span>
+          <div class="big-cat-name">Cyberpunk / Neon</div>
+          <div class="big-cat-count">950+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="space"
+             onclick="openCategory('space')">
+          <span class="big-cat-icon">🚀</span>
+          <div class="big-cat-name">Space & Cosmos</div>
+          <div class="big-cat-count">700+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="nature"
+             onclick="openCategory('nature')">
+          <span class="big-cat-icon">🌿</span>
+          <div class="big-cat-name">Nature</div>
+          <div class="big-cat-count">600+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="cars"
+             onclick="openCategory('cars')">
+          <span class="big-cat-icon">🚗</span>
+          <div class="big-cat-name">Cars & Bikes</div>
+          <div class="big-cat-count">500+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="abstract"
+             onclick="openCategory('abstract')">
+          <span class="big-cat-icon">🎨</span>
+          <div class="big-cat-name">Abstract & Art</div>
+          <div class="big-cat-count">800+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="dark"
+             onclick="openCategory('dark')">
+          <span class="big-cat-icon">🌑</span>
+          <div class="big-cat-name">Dark / Minimal</div>
+          <div class="big-cat-count">650+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+        <div class="big-cat-card fade-in" data-cat="movies"
+             onclick="openCategory('movies')">
+          <span class="big-cat-icon">🎬</span>
+          <div class="big-cat-name">Movies & TV</div>
+          <div class="big-cat-count">400+ wallpapers</div>
+          <span class="big-cat-arrow">Browse →</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== SINGLE CATEGORY VIEW ===== -->
+<div id="singleCatView" class="single-cat-section">
+
+  <!-- Category Header -->
+  <div class="cat-detail-header">
+    <div class="container">
+      <button class="cat-back-btn" onclick="goBackToAll()">
+        ← Wapas Categories
+      </button>
+      <div class="cat-detail-top">
+        <div class="cat-detail-icon" id="catDetailIcon">⛩️</div>
+        <div class="cat-detail-info">
+          <h1 id="catDetailName">Anime</h1>
+          <p id="catDetailDesc">Best anime wallpapers — Naruto, One Piece, Demon Slayer & more</p>
+        </div>
+      </div>
+
+      <!-- Sub-categories -->
+      <div class="subcats-row" id="subcatsRow"></div>
+    </div>
+  </div>
+
+  <!-- Sort Bar -->
+  <div class="sort-bar">
+    <div class="container sort-bar-inner">
+      <span class="sort-label">Sort:</span>
+      <button class="sort-btn active" onclick="setSort('popular', this)">🔥 Popular</button>
+      <button class="sort-btn" onclick="setSort('newest', this)">🆕 Newest</button>
+      <button class="sort-btn" onclick="setSort('most-liked', this)">❤️ Most Liked</button>
+      <div class="sort-count" id="catCount"><span>0</span> wallpapers</div>
+    </div>
+  </div>
+
+  <!-- Wallpapers Grid -->
+  <section class="cat-wallpapers-section">
+    <div class="container">
+      <div class="wallpaper-grid" id="catGrid"></div>
+      <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+        <button class="load-more-btn" onclick="loadMore()">
+          Load More Wallpapers
+        </button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Neo<span class="text-purple">Wallz</span></div>
+      <p>Best Anime & Gaming wallpapers — Free forever.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/pages/wallpapers.html">All Wallpapers</a></li>
+        <li><a href="/pages/category.html">Categories</a></li>
+        <li><a href="/pages/search.html">Search</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="/pages/login.html">Login / Register</a></li>
+        <li><a href="/pages/profile.html">My Profile</a></li>
+        <li><a href="/pages/saved.html">Saved</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/pages/legal/privacy.html">Privacy</a></li>
+        <li><a href="/pages/legal/terms.html">Terms</a></li>
+        <li><a href="/pages/legal/dmca.html">DMCA</a></li>
+        <li><a href="/pages/legal/contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="text-muted">© 2025 NeoWallz — All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- JS -->
+<script src="../js/main.js"></script>
+<script src="../js/wallpapers.js"></script>
+<script>
+
+// ============================================
+//   CATEGORY PAGE JS
+// ============================================
+
+// ---- Category Data ----
+const categoryData = {
+  anime: {
+    icon: '⛩️',
+    name: 'Anime',
+    desc: 'Best anime wallpapers — Naruto, One Piece, Demon Slayer & more',
+    subcats: ['All', 'Naruto', 'One Piece', 'Demon Slayer', 'Attack on Titan', 'Dragon Ball', 'Jujutsu Kaisen']
+  },
+  gaming: {
+    icon: '🎮',
+    name: 'Gaming',
+    desc: 'Top gaming wallpapers — Valorant, GTA, Minecraft, CS2 & more',
+    subcats: ['All', 'Valorant', 'GTA', 'Minecraft', 'CS2', 'Fortnite', 'Elden Ring']
+  },
+  cyberpunk: {
+    icon: '🌆',
+    name: 'Cyberpunk / Neon',
+    desc: 'Futuristic neon city wallpapers — dark, glowing, aesthetic',
+    subcats: ['All', 'Neon City', 'Rain Streets', 'Synthwave', 'Retro Neon']
+  },
+  space: {
+    icon: '🚀',
+    name: 'Space & Cosmos',
+    desc: 'Galaxy, stars, nebula, planets — universe ki khoobsurti',
+    subcats: ['All', 'Galaxy', 'Nebula', 'Planets', 'Black Hole', 'Astronaut']
+  },
+  nature: {
+    icon: '🌿',
+    name: 'Nature',
+    desc: 'Mountains, forests, waterfalls — peaceful nature wallpapers',
+    subcats: ['All', 'Mountains', 'Forest', 'Ocean', 'Sunset', 'Snow']
+  },
+  cars: {
+    icon: '🚗',
+    name: 'Cars & Bikes',
+    desc: 'Sports cars, supercars, motorcycles — speed & style',
+    subcats: ['All', 'Supercar', 'Motorcycle', 'JDM', 'Vintage', 'F1']
+  },
+  abstract: {
+    icon: '🎨',
+    name: 'Abstract & Art',
+    desc: 'Digital art, abstract patterns, creative wallpapers',
+    subcats: ['All', 'Geometric', 'Fluid Art', 'Glitch', 'Vaporwave']
+  },
+  dark: {
+    icon: '🌑',
+    name: 'Dark / Minimal',
+    desc: 'Dark backgrounds, minimal designs — clean aur sleek',
+    subcats: ['All', 'Pure Dark', 'Minimal', 'Dark Gradient', 'AMOLED Black']
+  },
+  movies: {
+    icon: '🎬',
+    name: 'Movies & TV',
+    desc: 'Popular movies & TV show wallpapers — iconic scenes',
+    subcats: ['All', 'Marvel', 'DC', 'Sci-Fi', 'Horror', 'Anime Movies']
+  }
+};
+
+// ---- Demo Wallpapers per category ----
+const demoWalls = {
+  anime:     generateWalls('anime',     ['naruto','demon','luffy','titan','dragonball','jujutsu']),
+  gaming:    generateWalls('gaming',    ['valo','gta','mine','cs2','fortnite','elden']),
+  cyberpunk: generateWalls('cyberpunk', ['cyber','tokyo','neon1','neon2','synth','rain']),
+  space:     generateWalls('space',     ['space','milky','nebula','planet','hole','astro']),
+  nature:    generateWalls('nature',    ['forest','mountain','ocean','sunset','snow','lake']),
+  cars:      generateWalls('cars',      ['ferrari','lambo','bike1','jdm','f1','vintage']),
+  abstract:  generateWalls('abstract',  ['abst','geo','fluid','glitch','vapor','wave']),
+  dark:      generateWalls('dark',      ['dark1','dark2','minimal','amoled','grad','black']),
+  movies:    generateWalls('movies',    ['marvel','dc','scifi','horror','animov','classic'])
+};
+
+function generateWalls(cat, seeds) {
+  return seeds.map((seed, i) => ({
+    id: `${cat}-${i+1}`,
+    title: `${categoryData[cat]?.name || cat} Wallpaper ${i+1}`,
+    category: cat,
+    resolution: ['HD','2K','4K'][i % 3],
+    is_featured: i < 2,
+    likes_count: Math.floor(Math.random() * 500) + 50,
+    thumbnail_url: `https://picsum.photos/seed/${seed}/400/700`,
+    image_url: `https://picsum.photos/seed/${seed}/1920/1080`
+  }));
+}
+
+// ---- State ----
+let currentCat = '';
+let currentSort = 'popular';
+let currentSubcat = 'All';
+let displayCount = 6;
+
+// ---- On Page Load ----
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('cat');
+  if (cat && categoryData[cat]) {
+    openCategory(cat);
+  }
+});
+
+// ---- Open Category ----
+function openCategory(cat) {
+  currentCat = cat;
+  currentSubcat = 'All';
+  currentSort = 'popular';
+  displayCount = 6;
+
+  const data = categoryData[cat];
+  if (!data) return;
+
+  // Show single category view
+  document.getElementById('allCatsView').style.display = 'none';
+  document.getElementById('singleCatView').classList.add('active');
+
+  // Header fill karo
+  document.getElementById('catDetailIcon').textContent = data.icon;
+  document.getElementById('catDetailName').textContent = data.name;
+  document.getElementById('catDetailDesc').textContent = data.desc;
+
+  // Subcats banao
+  const subcatsRow = document.getElementById('subcatsRow');
+  subcatsRow.innerHTML = data.subcats.map(s => `
+    <button class="subcat-chip ${s === 'All' ? 'active' : ''}"
+            onclick="setSubcat('${s}', this)">
+      ${s}
+    </button>
+  `).join('');
+
+  // URL update karo
+  const url = new URL(window.location);
+  url.searchParams.set('cat', cat);
+  window.history.pushState({}, '', url);
+
+  // Wallpapers load karo
+  loadCatWallpapers();
+
+  // Top pe scroll karo
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- Load Wallpapers ----
+function loadCatWallpapers() {
+  const walls = demoWalls[currentCat] || [];
+  const grid = document.getElementById('catGrid');
+  const countEl = document.getElementById('catCount');
+
+  // Sort karo
+  let sorted = [...walls];
+  if (currentSort === 'most-liked') {
+    sorted.sort((a, b) => b.likes_count - a.likes_count);
+  } else if (currentSort === 'newest') {
+    sorted.reverse();
+  }
+
+  // Subcat filter
+  if (currentSubcat !== 'All') {
+    sorted = sorted.filter(w =>
+      w.title.toLowerCase().includes(currentSubcat.toLowerCase())
+    );
+    if (sorted.length === 0) sorted = walls.slice(0, 3);
+  }
+
+  // Count update karo
+  countEl.innerHTML = `<span>${sorted.length}</span> wallpapers`;
+
+  // Slice — displayCount tak dikhaao
+  const toShow = sorted.slice(0, displayCount);
+  renderWallpaperGrid(toShow, 'catGrid');
+
+  // Load more button
+  const loadMoreWrap = document.getElementById('loadMoreWrap');
+  loadMoreWrap.style.display = sorted.length > displayCount ? 'block' : 'none';
+}
+
+// ---- Load More ----
+function loadMore() {
+  displayCount += 6;
+  loadCatWallpapers();
+}
+
+// ---- Sort ----
+function setSort(sort, btn) {
+  currentSort = sort;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayCount = 6;
+  loadCatWallpapers();
+}
+
+// ---- Subcat ----
+function setSubcat(subcat, btn) {
+  currentSubcat = subcat;
+  document.querySelectorAll('.subcat-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayCount = 6;
+  loadCatWallpapers();
+}
+
+// ---- Back to All ----
+function goBackToAll() {
+  document.getElementById('allCatsView').style.display = 'block';
+  document.getElementById('singleCatView').classList.remove('active');
+  const url = new URL(window.location);
+  url.searchParams.delete('cat');
+  window.history.pushState({}, '', url);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+</script>
+
+</body>
+</html>

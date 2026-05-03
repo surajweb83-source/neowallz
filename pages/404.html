@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Page Nahi Mila | NeoWallz</title>
+  <meta name="description" content="Oops! Page nahi mila — NeoWallz pe wapas jao.">
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+
+    .error-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    /* Animated background */
+    .error-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%,
+          rgba(124,58,237,0.15) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%,
+          rgba(6,182,212,0.1) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%,
+          rgba(236,72,153,0.07) 0%, transparent 50%);
+    }
+
+    /* Floating particles */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--color-purple);
+      border-radius: 50%;
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.3; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    .error-content {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+    }
+
+    /* 404 big number */
+    .error-number {
+      font-family: var(--font-heading);
+      font-size: clamp(6rem, 20vw, 10rem);
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 10px;
+      background: linear-gradient(
+        135deg,
+        var(--color-purple),
+        var(--color-cyan),
+        var(--color-pink)
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: glitch 3s ease-in-out infinite;
+    }
+
+    /* Glitch effect */
+    @keyframes glitch {
+      0%, 90%, 100% { transform: translate(0); filter: none; }
+      91%  { transform: translate(-3px, 1px); filter: hue-rotate(90deg); }
+      93%  { transform: translate(3px, -1px); filter: hue-rotate(-90deg); }
+      95%  { transform: translate(-2px, 2px); filter: hue-rotate(45deg); }
+      97%  { transform: translate(2px, -2px); filter: none; }
+    }
+
+    /* Anime character placeholder */
+    .error-character {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      animation: bounce 2s ease-in-out infinite;
+      display: block;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    .error-title {
+      font-family: var(--font-sub-heading);
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .error-desc {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Action buttons */
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    /* Quick links */
+    .error-quick-links {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .error-quick-link {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      text-decoration: none;
+      transition: var(--transition-fast);
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+    }
+    .error-quick-link:hover {
+      border-color: var(--color-cyan);
+      color: var(--color-cyan);
+    }
+
+    /* Search box */
+    .error-search {
+      display: flex;
+      align-items: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 8px 8px 8px 16px;
+      gap: 10px;
+      max-width: 400px;
+      margin: 0 auto 32px;
+      transition: var(--transition);
+    }
+    .error-search:focus-within {
+      border-color: var(--color-purple);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+    }
+    .error-search input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-body);
+    }
+    .error-search input::placeholder { color: var(--text-muted); }
+    .error-search-btn {
+      background: var(--color-purple);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      white-space: nowrap;
+    }
+    .error-search-btn:hover {
+      background: var(--color-purple-light);
+    }
+
+    /* Countdown timer */
+    .auto-redirect {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 20px;
+    }
+    .countdown {
+      color: var(--color-cyan);
+      font-weight: 700;
+      font-family: var(--font-heading);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">
+      Neo<span class="text-purple">Wallz</span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html"
+         class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Animated bg -->
+<div class="error-bg"></div>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- 404 Content -->
+<div class="error-page">
+  <div class="error-content">
+
+    <!-- Character -->
+    <span class="error-character">😵</span>
+
+    <!-- 404 number -->
+    <div class="error-number">404</div>
+
+    <h1 class="error-title">
+      Yeh Page Kho Gaya! 🌀
+    </h1>
+
+    <p class="error-desc">
+      Lagta hai yeh page kisi jutsu se gayab ho gaya...
+      ya ho sakta hai URL galat ho. Ghabrao mat —
+      NeoWallz pe bahut saare wallpapers hain! 🎌
+    </p>
+
+    <!-- Search -->
+    <div class="error-search">
+      <span>🔍</span>
+      <input type="text" id="errorSearch"
+             placeholder="Wallpaper search karo..."
+             autocomplete="off" />
+      <button class="error-search-btn"
+              onclick="doErrorSearch()">
+        Search
+      </button>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="error-actions">
+      <a href="/index.html" class="btn btn-primary">
+        🏠 Homepage Pe Jao
+      </a>
+      <a href="/pages/wallpapers.html" class="btn btn-outline">
+        🖼️ Wallpapers Dekho
+      </a>
+    </div>
+
+    <!-- Quick links -->
+    <div class="error-quick-links">
+      <a href="/pages/category.html?cat=anime"
+         class="error-quick-link">⛩️ Anime</a>
+      <a href="/pages/category.html?cat=gaming"
+         class="error-quick-link">🎮 Gaming</a>
+      <a href="/pages/category.html?cat=cyberpunk"
+         class="error-quick-link">🌆 Cyberpunk</a>
+      <a href="/pages/category.html?cat=space"
+         class="error-quick-link">🚀 Space</a>
+      <a href="/pages/category.html?cat=dark"
+         class="error-quick-link">🌑 Dark</a>
+    </div>
+
+    <!-- Auto redirect countdown -->
+    <p class="auto-redirect">
+      <span class="countdown" id="countdownNum">10</span>
+      seconds mein homepage pe redirect ho jaoge...
+      <a href="javascript:void(0)"
+         onclick="clearInterval(countdownInterval)"
+         style="color:var(--color-pink);font-size:12px;">
+        Cancel
+      </a>
+    </p>
+
+  </div>
+</div>
+
+<script src="../js/main.js"></script>
+<script>
+
+// ---- Particles generate karo ----
+function generateParticles() {
+  const container = document.getElementById('particles');
+  const colors = [
+    'var(--color-purple)',
+    'var(--color-cyan)',
+    'var(--color-pink)'
+  ];
+
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left      = Math.random() * 100 + 'vw';
+    p.style.width     = (Math.random() * 4 + 1) + 'px';
+    p.style.height    = p.style.width;
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDuration  = (Math.random() * 8 + 5) + 's';
+    p.style.animationDelay     = (Math.random() * 5) + 's';
+    container.appendChild(p);
+  }
+}
+generateParticles();
+
+// ---- Search ----
+function doErrorSearch() {
+  const q = document.getElementById('errorSearch').value.trim();
+  if (q) {
+    window.location.href =
+      `/pages/search.html?q=${encodeURIComponent(q)}`;
+  }
+}
+document.getElementById('errorSearch')
+  .addEventListener('keydown', e => {
+    if (e.key === 'Enter') doErrorSearch();
+  });
+
+// ---- Auto redirect countdown ----
+let seconds = 10;
+const countdownEl = document.getElementById('countdownNum');
+
+const countdownInterval = setInterval(() => {
+  seconds--;
+  if (countdownEl) countdownEl.textContent = seconds;
+  if (seconds <= 0) {
+    clearInterval(countdownInterval);
+    window.location.href = '/index.html';
+  }
+}, 1000);
+
+</script>
+</body>
+</html>

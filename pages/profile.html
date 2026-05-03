@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — NeoWallz</title>
+  <meta name="description" content="Apna NeoWallz profile dekho aur manage karo">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    /* ===== PROFILE PAGE STYLES ===== */
+
+    .profile-page {
+      padding: 0 0 80px;
+    }
+
+    /* ===== PROFILE HEADER / BANNER ===== */
+    .profile-banner {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Banner bg glow */
+    .profile-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(6,182,212,0.1) 0%, transparent 60%);
+    }
+
+    .profile-banner-inner {
+      position: relative;
+      z-index: 1;
+      padding: 40px 0 0;
+    }
+
+    /* Avatar + Info row */
+    .profile-top {
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      padding-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Avatar */
+    .profile-avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .profile-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-purple), var(--color-cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      border: 3px solid var(--bg-primary);
+      cursor: pointer;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(124,58,237,0.5);
+    }
+    .avatar-edit-btn {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      background: var(--color-purple);
+      border: 2px solid var(--bg-primary);
+      color: white;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+    }
+    .avatar-edit-btn:hover {
+      background: var(--color-purple-light);
+      transform: scale(1.1);
+    }
+
+    /* Profile info */
+    .profile-info { flex: 1; }
+    .profile-username {
+      font-family: var(--font-heading);
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      margin-bottom: 4px;
+    }
+    .profile-email {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .profile-role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      color: var(--color-purple-light);
+      padding: 3px 12px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+    }
+    .profile-role-badge.admin {
+      background: rgba(236,72,153,0.15);
+      border-color: rgba(236,72,153,0.3);
+      color: var(--color-pink);
+    }
+
+    /* Profile actions */
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ===== STATS TABS ===== */
+    .profile-stats-row {
+      display: flex;
+      border-top: 1px solid var(--border-color);
+      margin-top: 20px;
+    }
+    .profile-stat-tab {
+      flex: 1;
+      text-align: center;
+      padding: 16px 12px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition-fast);
+      text-decoration: none;
+    }
+    .profile-stat-tab:hover {
+      background: var(--bg-hover);
+    }
+    .profile-stat-tab.active {
+      border-bottom-color: var(--color-purple);
+    }
+    .stat-tab-num {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      color: var(--text-primary);
+      display: block;
+    }
+    .profile-stat-tab.active .stat-tab-num {
+      color: var(--color-purple-light);
+    }
+    .stat-tab-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== CONTENT TABS ===== */
+    .profile-content {
+      padding-top: 36px;
+    }
+    .content-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 28px;
+      background: var(--bg-secondary);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      width: fit-content;
+    }
+    .content-tab {
+      padding: 9px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-sub-heading);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: var(--transition-fast);
+      border: none;
+      background: none;
+    }
+    .content-tab.active {
+      background: var(--color-purple);
+      color: white;
+    }
+    .content-tab:hover:not(.active) {
+      color: var(--text-primary);
+    }
+
+    /* Tab panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ===== EDIT PROFILE FORM ===== */
+    .edit-profile-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      max-width: 500px;
+    }
+    .edit-profile-card h3 {
+      font-family: var(--font-sub-heading);
+      font-size: 1.1rem;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: var(--transition-fast);
+    }
+    .form-input:focus {
+      border-color: var(--color-purple);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+    .form-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* Save button */
+    .save-profile-btn {
+      background: var(--color-purple);
+      color: white;
+      border: none;
+      padding: 11px 28px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sub-heading);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .save-profile-btn:hover {
+      background: var(--color-purple-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+    }
+    .save-profile-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Alert */
+    .profile-alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .profile-alert.error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171;
+      display: flex;
+    }
+    .profile-alert.success {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #4ade80;
+      display: flex;
+    }
+
+    /* Danger zone */
+    .danger-zone {
+      background: rgba(239,68,68,0.05);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      margin-top: 24px;
+      max-width: 500px;
+    }
+    .danger-zone h4 {
+      font-family: var(--font-sub-heading);
+      color: #f87171;
+      margin-bottom: 8px;
+    }
+    .danger-zone p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+    .danger-btn {
+      background: none;
+      border: 1px solid rgba(239,68,68,0.4);
+      color: #f87171;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sub-heading);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .danger-btn:hover {
+      background: rgba(239,68,68,0.1);
+      border-color: #f87171;
+    }
+
+    /* ===== LOGIN REQUIRED ===== */
+    .login-required {
+      text-align: center;
+      padding: 100px 20px;
+    }
+    .login-required .lr-icon { font-size: 4rem; margin-bottom: 16px; }
+    .login-required h2 {
+      font-family: var(--font-sub-heading);
+      margin-bottom: 10px;
+    }
+    .login-required p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Loading */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+    .loading-spinner {
+      width: 44px; height: 44px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--color-purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    /* ===== LIKED WALLPAPERS TAB ===== */
+    .liked-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .liked-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    /* ===== LOGOUT CONFIRM ===== */
+    .confirm-modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-modal-bg.open { display: flex; }
+    .confirm-modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+    }
+    .confirm-modal .cm-icon { font-size: 3rem; margin-bottom: 14px; }
+    .confirm-modal h3 {
+      font-family: var(--font-sub-heading);
+      margin-bottom: 8px;
+    }
+    .confirm-modal p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .confirm-modal-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      .profile-top { flex-direction: column; align-items: flex-start; }
+      .profile-actions { margin-left: 0; }
+      .profile-stats-row { overflow-x: auto; }
+      .content-tabs { width: 100%; overflow-x: auto; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html" class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== MAIN ===== -->
+<div class="profile-page">
+
+  <!-- Loading -->
+  <div class="loading-state" id="loadingState">
+    <div class="loading-spinner"></div>
+    <p>Profile load ho rahi hai...</p>
+  </div>
+
+  <!-- Not logged in -->
+  <div class="login-required" id="loginRequired" style="display:none;">
+    <div class="lr-icon">🔒</div>
+    <h2>Login karo profile dekhne ke liye</h2>
+    <p>Apna profile, saved collection aur history dekhne ke liye login karo</p>
+    <a href="/pages/login.html?redirect=/pages/profile.html"
+       class="btn btn-primary">
+      🔑 Login karo
+    </a>
+  </div>
+
+  <!-- Profile Content -->
+  <div id="profileContent" style="display:none;">
+
+    <!-- ===== PROFILE BANNER ===== -->
+    <div class="profile-banner">
+      <div class="container profile-banner-inner">
+
+        <div class="profile-top">
+
+          <!-- Avatar -->
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="profileAvatar"
+                 onclick="switchTab('edit')">
+              U
+            </div>
+            <button class="avatar-edit-btn"
+                    onclick="switchTab('edit')"
+                    title="Edit profile">
+              ✏️
+            </button>
+          </div>
+
+          <!-- Info -->
+          <div class="profile-info">
+            <div class="profile-username" id="profileUsername">
+              Loading...
+            </div>
+            <div class="profile-email" id="profileEmail">
+              loading@email.com
+            </div>
+            <span class="profile-role-badge" id="profileRoleBadge">
+              👤 User
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="profile-actions">
+            <a href="/pages/saved.html" class="btn btn-outline">
+              🔖 My Collection
+            </a>
+            <button class="btn btn-primary"
+                    onclick="openLogoutModal()">
+              🚪 Logout
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Stats Tabs -->
+        <div class="profile-stats-row">
+          <div class="profile-stat-tab active"
+               onclick="switchTab('saved')">
+            <span class="stat-tab-num" id="statSaved">0</span>
+            <div class="stat-tab-label">Saved</div>
+          </div>
+          <div class="profile-stat-tab"
+               onclick="switchTab('liked')">
+            <span class="stat-tab-num" id="statLiked">0</span>
+            <div class="stat-tab-label">Liked</div>
+          </div>
+          <div class="profile-stat-tab"
+               onclick="switchTab('downloads')">
+            <span class="stat-tab-num" id="statDownloads">0</span>
+            <div class="stat-tab-label">Downloads</div>
+          </div>
+          <div class="profile-stat-tab"
+               onclick="switchTab('edit')">
+            <span class="stat-tab-num">⚙️</span>
+            <div class="stat-tab-label">Settings</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== CONTENT AREA ===== -->
+    <div class="container profile-content">
+
+      <!-- Content Tabs (small) -->
+      <div class="content-tabs">
+        <button class="content-tab active" id="tab-saved"
+                onclick="switchTab('saved')">🔖 Saved</button>
+        <button class="content-tab" id="tab-liked"
+                onclick="switchTab('liked')">❤️ Liked</button>
+        <button class="content-tab" id="tab-downloads"
+                onclick="switchTab('downloads')">⬇️ Downloads</button>
+        <button class="content-tab" id="tab-edit"
+                onclick="switchTab('edit')">⚙️ Edit Profile</button>
+      </div>
+
+      <!-- ===== TAB: SAVED ===== -->
+      <div class="tab-panel active" id="panel-saved">
+        <div class="wallpaper-grid" id="savedGrid">
+          <div class="loading-state" style="grid-column:1/-1;">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:24px;">
+          <a href="/pages/saved.html" class="btn btn-outline">
+            Full Collection Dekho →
+          </a>
+        </div>
+      </div>
+
+      <!-- ===== TAB: LIKED ===== -->
+      <div class="tab-panel" id="panel-liked">
+        <div class="wallpaper-grid" id="likedGrid">
+          <div class="loading-state" style="grid-column:1/-1;">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: DOWNLOADS ===== -->
+      <div class="tab-panel" id="panel-downloads">
+        <div id="dlPreviewList">
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:24px;">
+          <a href="/pages/downloads.html" class="btn btn-outline">
+            Full History Dekho →
+          </a>
+        </div>
+      </div>
+
+      <!-- ===== TAB: EDIT PROFILE ===== -->
+      <div class="tab-panel" id="panel-edit">
+
+        <div class="edit-profile-card">
+          <h3>✏️ Profile Edit Karo</h3>
+
+          <!-- Alert -->
+          <div class="profile-alert" id="profileAlert">
+            <span id="profileAlertMsg"></span>
+          </div>
+
+          <!-- Username -->
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input class="form-input" type="text" id="editUsername"
+                   placeholder="cooluser123"
+                   minlength="3" maxlength="20" />
+          </div>
+
+          <!-- Email (disabled — Supabase Auth manage karta hai) -->
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" id="editEmail"
+                   disabled />
+            <p class="form-hint">Email change ke liye support se contact karo</p>
+          </div>
+
+          <!-- Avatar URL -->
+          <div class="form-group">
+            <label class="form-label">Avatar URL (optional)</label>
+            <input class="form-input" type="url" id="editAvatarUrl"
+                   placeholder="https://example.com/avatar.jpg" />
+            <p class="form-hint">
+              Koi bhi image URL — ya blank chhodo initials ke liye
+            </p>
+          </div>
+
+          <!-- Save button -->
+          <button class="save-profile-btn" id="saveProfileBtn"
+                  onclick="saveProfile()">
+            💾 Changes Save Karo
+          </button>
+
+        </div>
+
+        <!-- Change Password -->
+        <div class="edit-profile-card" style="margin-top:20px;">
+          <h3>🔐 Password Change Karo</h3>
+
+          <div class="profile-alert" id="passAlert">
+            <span id="passAlertMsg"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Naya Password</label>
+            <input class="form-input" type="password" id="newPassword"
+                   placeholder="Min 6 characters"
+                   minlength="6" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input class="form-input" type="password" id="confirmPassword"
+                   placeholder="Dobara likho" />
+          </div>
+
+          <button class="save-profile-btn" id="changePassBtn"
+                  onclick="changePassword()">
+            🔐 Password Update Karo
+          </button>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+          <h4>⚠️ Danger Zone</h4>
+          <p>
+            Account delete karne se saara data permanently hata diya jaayega.
+            Ye action undo nahi ho sakta.
+          </p>
+          <button class="danger-btn" onclick="confirmDeleteAccount()">
+            🗑️ Account Delete Karo
+          </button>
+        </div>
+
+      </div>
+      <!-- end tab-panel -->
+
+    </div>
+    <!-- end profile-content -->
+
+  </div>
+  <!-- end profileContent -->
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Neo<span class="text-purple">Wallz</span></div>
+      <p>Best Anime & Gaming wallpapers — Free forever.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>My Account</h4>
+      <ul>
+        <li><a href="/pages/saved.html">Saved Collection</a></li>
+        <li><a href="/pages/downloads.html">Download History</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/pages/wallpapers.html">All Wallpapers</a></li>
+        <li><a href="/pages/category.html">Categories</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/pages/legal/privacy.html">Privacy</a></li>
+        <li><a href="/pages/legal/terms.html">Terms</a></li>
+        <li><a href="/pages/legal/contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="text-muted">© 2025 NeoWallz — All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- ===== LOGOUT CONFIRM MODAL ===== -->
+<div class="confirm-modal-bg" id="logoutModalBg"
+     onclick="closeLogoutModal(event)">
+  <div class="confirm-modal">
+    <div class="cm-icon">🚪</div>
+    <h3>Logout karna chahte ho?</h3>
+    <p>Session end ho jaayega. Wapas login karna padega.</p>
+    <div class="confirm-modal-btns">
+      <button class="btn btn-primary" onclick="doLogout()">
+        Haan, Logout
+      </button>
+      <button class="btn btn-outline" onclick="closeLogoutModal()">
+        Nahi
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="../js/supabase.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/wallpapers.js"></script>
+<script>
+
+// ============================================
+//   PROFILE PAGE JS
+// ============================================
+
+let currentUser = null;
+let activeTab = 'saved';
+
+// ---- Page Load ----
+window.addEventListener('DOMContentLoaded', async () => {
+  const supabase = window._supabase;
+  if (!supabase) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  document.getElementById('loadingState').style.display = 'none';
+
+  if (!session) {
+    document.getElementById('loginRequired').style.display = 'block';
+    return;
+  }
+
+  currentUser = session.user;
+  document.getElementById('profileContent').style.display = 'block';
+
+  // Profile fill karo
+  fillProfileInfo(currentUser);
+
+  // Stats load karo
+  await loadStats(currentUser.id);
+
+  // Default tab — saved
+  await loadSavedTab(currentUser.id);
+});
+
+// ---- Profile Info Fill ----
+function fillProfileInfo(user) {
+  const meta = user.user_metadata || {};
+  const username = meta.username || user.email?.split('@')[0] || 'User';
+  const avatarUrl = meta.avatar_url || '';
+  const role = meta.role || 'user';
+
+  // Username + email
+  document.getElementById('profileUsername').textContent = username;
+  document.getElementById('profileEmail').textContent = user.email;
+
+  // Role badge
+  const roleBadge = document.getElementById('profileRoleBadge');
+  if (role === 'admin') {
+    roleBadge.textContent = '👑 Admin';
+    roleBadge.classList.add('admin');
+  } else {
+    roleBadge.textContent = '👤 User';
+  }
+
+  // Avatar
+  const avatarEl = document.getElementById('profileAvatar');
+  if (avatarUrl) {
+    avatarEl.innerHTML = `<img src="${avatarUrl}" alt="${username}" />`;
+  } else {
+    avatarEl.textContent = username[0].toUpperCase();
+  }
+
+  // Edit form prefill
+  document.getElementById('editUsername').value = username;
+  document.getElementById('editEmail').value = user.email;
+  document.getElementById('editAvatarUrl').value = avatarUrl;
+}
+
+// ---- Load Stats ----
+async function loadStats(userId) {
+  const supabase = window._supabase;
+  try {
+    // Saved count
+    const { count: savedCount } = await supabase
+      .from('saved_wallpapers')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    // Liked count
+    const { count: likedCount } = await supabase
+      .from('likes')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    // Downloads count
+    const { count: dlCount } = await supabase
+      .from('downloads')
+      .select('id', { count: 'exact', head: true });
+
+    document.getElementById('statSaved').textContent     = savedCount || 0;
+    document.getElementById('statLiked').textContent     = likedCount || 0;
+    document.getElementById('statDownloads').textContent = dlCount || 0;
+
+  } catch {
+    // Demo counts
+    document.getElementById('statSaved').textContent     = '3';
+    document.getElementById('statLiked').textContent     = '7';
+    document.getElementById('statDownloads').textContent = '12';
+  }
+}
+
+// ---- Tab Switch ----
+function switchTab(tab) {
+  activeTab = tab;
+
+  // All tabs deactivate karo
+  document.querySelectorAll('.content-tab').forEach(t =>
+    t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p =>
+    p.classList.remove('active'));
+  document.querySelectorAll('.profile-stat-tab').forEach(t =>
+    t.classList.remove('active'));
+
+  // Active karo
+  const tabBtn = document.getElementById(`tab-${tab}`);
+  if (tabBtn) tabBtn.classList.add('active');
+
+  const panel = document.getElementById(`panel-${tab}`);
+  if (panel) panel.classList.add('active');
+
+  // Load karo agar pehli baar
+  if (!currentUser) return;
+  if (tab === 'saved')     loadSavedTab(currentUser.id);
+  if (tab === 'liked')     loadLikedTab(currentUser.id);
+  if (tab === 'downloads') loadDownloadsTab(currentUser.id);
+}
+
+// ---- Load Saved Tab ----
+async function loadSavedTab(userId) {
+  const supabase = window._supabase;
+  showSkeletons('savedGrid', 6);
+  try {
+    const { data, error } = await supabase
+      .from('saved_wallpapers')
+      .select(`
+        wallpapers (
+          id, title, thumbnail_url, image_url,
+          resolution, likes_count, is_featured
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    if (error) throw error;
+
+    const walls = (data || [])
+      .filter(d => d.wallpapers)
+      .map(d => ({ ...d.wallpapers, category: 'Saved' }));
+
+    renderWallpaperGrid(walls, 'savedGrid');
+
+  } catch {
+    // Demo
+    renderWallpaperGrid(getDemoWalls(), 'savedGrid');
+  }
+}
+
+// ---- Load Liked Tab ----
+async function loadLikedTab(userId) {
+  const supabase = window._supabase;
+  showSkeletons('likedGrid', 6);
+  try {
+    const { data, error } = await supabase
+      .from('likes')
+      .select(`
+        wallpapers (
+          id, title, thumbnail_url, image_url,
+          resolution, likes_count, is_featured
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    if (error) throw error;
+
+    const walls = (data || [])
+      .filter(d => d.wallpapers)
+      .map(d => ({ ...d.wallpapers, category: 'Liked' }));
+
+    if (walls.length === 0) {
+      document.getElementById('likedGrid').innerHTML = `
+        <div class="liked-empty" style="grid-column:1/-1;">
+          <div class="empty-icon">❤️</div>
+          <p>Abhi tak koi wallpaper like nahi kiya</p>
+          <a href="/pages/wallpapers.html" class="btn btn-outline"
+             style="margin-top:14px;">
+            Browse karo
+          </a>
+        </div>`;
+      return;
+    }
+
+    renderWallpaperGrid(walls, 'likedGrid');
+
+  } catch {
+    renderWallpaperGrid(getDemoWalls().slice(0, 3), 'likedGrid');
+  }
+}
+
+// ---- Load Downloads Tab ----
+async function loadDownloadsTab(userId) {
+  const supabase = window._supabase;
+  const listEl = document.getElementById('dlPreviewList');
+
+  listEl.innerHTML = `<div class="loading-state">
+    <div class="loading-spinner"></div></div>`;
+
+  try {
+    const { data, error } = await supabase
+      .from('downloads')
+      .select(`
+        device_type, created_at,
+        wallpapers ( id, title, thumbnail_url, resolution )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+
+    const downloads = (data || []).filter(d => d.wallpapers);
+
+    if (downloads.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align:center;padding:40px;color:var(--text-muted);">
+          <p style="font-size:2.5rem;margin-bottom:10px;">⬇️</p>
+          <p>Koi download history nahi</p>
+        </div>`;
+      return;
+    }
+
+    const deviceMap = {
+      'android':'📱 Android','iphone':'🍎 iPhone',
+      'tablet':'📟 Tablet','pc-hd':'🖥️ HD',
+      'pc-2k':'🖥️ 2K','pc-4k':'🖥️ 4K'
+    };
+
+    listEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${downloads.map(d => `
+          <div style="
+            display:flex;align-items:center;gap:14px;
+            background:var(--bg-secondary);
+            border:1px solid var(--border-color);
+            border-radius:var(--radius-sm);
+            padding:12px 16px;
+            cursor:pointer;
+            transition:var(--transition-fast);"
+            onclick="goToDetail('${d.wallpapers.id}')"
+            onmouseover="this.style.borderColor='var(--color-purple)'"
+            onmouseout="this.style.borderColor='var(--border-color)'">
+            <img src="${d.wallpapers.thumbnail_url}"
+                 style="width:48px;height:64px;object-fit:cover;
+                        border-radius:6px;flex-shrink:0;" />
+            <div style="flex:1;">
+              <div style="font-family:var(--font-sub-heading);
+                          font-size:14px;font-weight:600;
+                          color:var(--text-primary);margin-bottom:4px;">
+                ${d.wallpapers.title}
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">
+                ${deviceMap[d.device_type] || '⬇️'} •
+                ${new Date(d.created_at).toLocaleDateString('en-IN')}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+
+  } catch {
+    listEl.innerHTML = `
+      <p style="color:var(--text-muted);text-align:center;padding:30px;">
+        History load nahi ho saki
+      </p>`;
+  }
+}
+
+// ---- Save Profile ----
+async function saveProfile() {
+  const supabase = window._supabase;
+  if (!currentUser) return;
+
+  const username  = document.getElementById('editUsername').value.trim();
+  const avatarUrl = document.getElementById('editAvatarUrl').value.trim();
+
+  if (!username || username.length < 3) {
+    showProfileAlert('Username kam se kam 3 characters ka hona chahiye!', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('saveProfileBtn');
+  btn.disabled = true;
+  btn.textContent = 'Save ho raha hai...';
+
+  try {
+    const { error } = await supabase.auth.updateUser({
+      data: { username, avatar_url: avatarUrl }
+    });
+
+    if (error) throw error;
+
+    // UI update karo
+    document.getElementById('profileUsername').textContent = username;
+    const avatarEl = document.getElementById('profileAvatar');
+    if (avatarUrl) {
+      avatarEl.innerHTML = `<img src="${avatarUrl}" alt="${username}" />`;
+    } else {
+      avatarEl.textContent = username[0].toUpperCase();
+    }
+
+    showProfileAlert('✅ Profile update ho gaya!', 'success');
+
+  } catch (err) {
+    showProfileAlert('❌ Update fail hua. Dobara try karo.', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '💾 Changes Save Karo';
+}
+
+// ---- Change Password ----
+async function changePassword() {
+  const supabase = window._supabase;
+  const newPass  = document.getElementById('newPassword').value;
+  const confirm  = document.getElementById('confirmPassword').value;
+
+  if (!newPass || newPass.length < 6) {
+    showPassAlert('Password kam se kam 6 characters ka hona chahiye!', 'error');
+    return;
+  }
+  if (newPass !== confirm) {
+    showPassAlert('❌ Dono passwords match nahi kar rahe!', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('changePassBtn');
+  btn.disabled = true;
+  btn.textContent = 'Update ho raha hai...';
+
+  try {
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+    if (error) throw error;
+    showPassAlert('✅ Password update ho gaya!', 'success');
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+  } catch {
+    showPassAlert('❌ Password update fail hua!', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔐 Password Update Karo';
+}
+
+// ---- Alert helpers ----
+function showProfileAlert(msg, type) {
+  const el = document.getElementById('profileAlert');
+  document.getElementById('profileAlertMsg').textContent = msg;
+  el.className = `profile-alert ${type}`;
+  setTimeout(() => { el.className = 'profile-alert'; }, 4000);
+}
+function showPassAlert(msg, type) {
+  const el = document.getElementById('passAlert');
+  document.getElementById('passAlertMsg').textContent = msg;
+  el.className = `profile-alert ${type}`;
+  setTimeout(() => { el.className = 'profile-alert'; }, 4000);
+}
+
+// ---- Logout Modal ----
+function openLogoutModal() {
+  document.getElementById('logoutModalBg').classList.add('open');
+}
+function closeLogoutModal(e) {
+  if (!e || e.target === document.getElementById('logoutModalBg')) {
+    document.getElementById('logoutModalBg').classList.remove('open');
+  }
+}
+async function doLogout() {
+  const supabase = window._supabase;
+  await supabase.auth.signOut();
+  window.location.href = '/index.html';
+}
+
+// ---- Delete Account ----
+function confirmDeleteAccount() {
+  const ok = confirm(
+    '⚠️ Account delete karna chahte ho?\n\nSaara data permanently delete ho jaayega!\nYe action undo nahi ho sakta!'
+  );
+  if (ok) {
+    alert('Account delete ke liye support@neowallz.com pe email karo.');
+  }
+}
+
+// ---- Demo walls ----
+function getDemoWalls() {
+  return [
+    { id:'1', title:'Naruto Sage Mode',    category:'Anime',    resolution:'4K', is_featured:true,  likes_count:245, thumbnail_url:'https://picsum.photos/seed/naruto/400/700',  image_url:'https://picsum.photos/seed/naruto/1920/1080'  },
+    { id:'3', title:'Cyberpunk City',      category:'Cyberpunk',resolution:'HD', is_featured:true,  likes_count:312, thumbnail_url:'https://picsum.photos/seed/cyber/400/700',   image_url:'https://picsum.photos/seed/cyber/1920/1080'   },
+    { id:'7', title:'One Piece Luffy',     category:'Anime',    resolution:'2K', is_featured:true,  likes_count:534, thumbnail_url:'https://picsum.photos/seed/luffy/400/700',   image_url:'https://picsum.photos/seed/luffy/1920/1080'   },
+    { id:'8', title:'GTA VI Miami',        category:'Gaming',   resolution:'4K', is_featured:false, likes_count:678, thumbnail_url:'https://picsum.photos/seed/gta/400/700',     image_url:'https://picsum.photos/seed/gta/1920/1080'     },
+    { id:'4', title:'Deep Space Galaxy',   category:'Space',    resolution:'4K', is_featured:false, likes_count:98,  thumbnail_url:'https://picsum.photos/seed/space/400/700',   image_url:'https://picsum.photos/seed/space/1920/1080'   },
+    { id:'5', title:'Demon Slayer',        category:'Anime',    resolution:'HD', is_featured:false, likes_count:421, thumbnail_url:'https://picsum.photos/seed/demon/400/700',   image_url:'https://picsum.photos/seed/demon/1920/1080'   },
+  ];
+}
+
+</script>
+
+</body>
+</html>

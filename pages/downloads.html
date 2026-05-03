@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Download History — NeoWallz</title>
+  <meta name="description" content="Tumhari download history — NeoWallz">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    .downloads-page { padding: 50px 0 80px; }
+
+    .page-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 40px 0 30px;
+      margin-bottom: 40px;
+    }
+    .page-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-header h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin-bottom: 6px;
+    }
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Download history list */
+    .dl-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .dl-history-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: var(--transition-fast);
+      cursor: pointer;
+    }
+    .dl-history-item:hover {
+      border-color: var(--color-purple);
+      background: var(--bg-hover);
+    }
+
+    .dl-thumb {
+      width: 60px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+    }
+
+    .dl-info { flex: 1; }
+    .dl-title {
+      font-family: var(--font-sub-heading);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .dl-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .dl-meta-item {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .dl-device-tag {
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      color: var(--color-purple-light);
+      padding: 2px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+    }
+
+    .dl-redownload-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      white-space: nowrap;
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .dl-redownload-btn:hover {
+      border-color: var(--color-purple);
+      color: var(--color-purple-light);
+      background: var(--bg-hover);
+    }
+
+    /* Stats */
+    .dl-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .dl-stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      text-align: center;
+    }
+    .dl-stat-num {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      color: var(--color-cyan);
+      display: block;
+    }
+    .dl-stat-label {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Date group header */
+    .date-group-label {
+      font-family: var(--font-sub-heading);
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 24px 0 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-icon { font-size: 4rem; margin-bottom: 16px; }
+    .empty-state h3 {
+      font-family: var(--font-sub-heading);
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* Not logged in */
+    .login-required {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .login-required .lr-icon { font-size: 4rem; margin-bottom: 16px; }
+    .login-required h2 {
+      font-family: var(--font-sub-heading);
+      margin-bottom: 10px;
+    }
+    .login-required p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* Loading */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .loading-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--color-cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @media (max-width: 500px) {
+      .dl-history-item { flex-wrap: wrap; }
+      .dl-redownload-btn { width: 100%; text-align: center; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html" class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container page-header-inner">
+    <div>
+      <h1>⬇️ Download <span class="text-cyan">History</span></h1>
+      <p>Tumne jo wallpapers download kiye hain</p>
+    </div>
+    <a href="/pages/wallpapers.html" class="btn btn-outline">
+      Aur Wallpapers Dhundo →
+    </a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="downloads-page">
+  <div class="container">
+
+    <!-- Loading -->
+    <div class="loading-state" id="loadingState">
+      <div class="loading-spinner"></div>
+      <p>History load ho rahi hai...</p>
+    </div>
+
+    <!-- Not logged in -->
+    <div class="login-required" id="loginRequired" style="display:none;">
+      <div class="lr-icon">🔒</div>
+      <h2>Login karo history dekhne ke liye</h2>
+      <p>Download history track karne ke liye login karo</p>
+      <a href="/pages/login.html?redirect=/pages/downloads.html"
+         class="btn btn-primary">
+        🔑 Login karo
+      </a>
+    </div>
+
+    <!-- Logged in content -->
+    <div id="dlContent" style="display:none;">
+
+      <!-- Stats -->
+      <div class="dl-stats">
+        <div class="dl-stat-card">
+          <span class="dl-stat-num" id="totalDownloads">0</span>
+          <div class="dl-stat-label">Total Downloads</div>
+        </div>
+        <div class="dl-stat-card">
+          <span class="dl-stat-num" id="thisMonthDl">0</span>
+          <div class="dl-stat-label">Is Mahine</div>
+        </div>
+      </div>
+
+      <!-- History list -->
+      <div id="dlHistoryList"></div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Neo<span class="text-purple">Wallz</span></div>
+      <p>Best Anime & Gaming wallpapers — Free forever.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="/pages/profile.html">My Profile</a></li>
+        <li><a href="/pages/saved.html">Saved Collection</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/pages/legal/privacy.html">Privacy</a></li>
+        <li><a href="/pages/legal/terms.html">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="text-muted">© 2025 NeoWallz — All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- JS -->
+<script src="../js/supabase.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/wallpapers.js"></script>
+<script>
+
+// ============================================
+//   DOWNLOADS HISTORY PAGE JS
+// ============================================
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const supabase = window._supabase;
+  if (!supabase) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  document.getElementById('loadingState').style.display = 'none';
+
+  if (!session) {
+    document.getElementById('loginRequired').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('dlContent').style.display = 'block';
+  await loadDownloadHistory();
+});
+
+async function loadDownloadHistory() {
+  const supabase = window._supabase;
+  const listEl = document.getElementById('dlHistoryList');
+
+  listEl.innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Load ho raha hai...</p>
+    </div>`;
+
+  try {
+    const { data, error } = await supabase
+      .from('downloads')
+      .select(`
+        id,
+        device_type,
+        created_at,
+        wallpapers (
+          id, title, thumbnail_url, image_url, resolution
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    const downloads = (data || []).filter(d => d.wallpapers);
+
+    // Stats
+    document.getElementById('totalDownloads').textContent = downloads.length;
+    const thisMonth = downloads.filter(d => {
+      const dlDate = new Date(d.created_at);
+      const now = new Date();
+      return dlDate.getMonth() === now.getMonth() &&
+             dlDate.getFullYear() === now.getFullYear();
+    });
+    document.getElementById('thisMonthDl').textContent = thisMonth.length;
+
+    if (downloads.length === 0) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⬇️</div>
+          <h3>Koi download history nahi</h3>
+          <p>Wallpapers download karo — yahan track hongi</p>
+          <a href="/pages/wallpapers.html" class="btn btn-primary">
+            Browse Wallpapers
+          </a>
+        </div>`;
+      return;
+    }
+
+    // Date se group karo
+    const groups = {};
+    downloads.forEach(d => {
+      const date = new Date(d.created_at);
+      const key = date.toLocaleDateString('en-IN', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(d);
+    });
+
+    // HTML banao
+    let html = '';
+    for (const [date, items] of Object.entries(groups)) {
+      html += `<div class="date-group-label">📅 ${date}</div>`;
+      html += `<div class="dl-history-list">`;
+      items.forEach(item => {
+        const wall = item.wallpapers;
+        const deviceMap = {
+          'android': '📱 Android',
+          'iphone':  '🍎 iPhone',
+          'tablet':  '📟 Tablet',
+          'pc-hd':   '🖥️ PC HD',
+          'pc-2k':   '🖥️ PC 2K',
+          'pc-4k':   '🖥️ PC 4K'
+        };
+        const deviceLabel = deviceMap[item.device_type] || '⬇️ Download';
+        const time = new Date(item.created_at).toLocaleTimeString('en-IN', {
+          hour: '2-digit', minute: '2-digit'
+        });
+
+        html += `
+          <div class="dl-history-item"
+               onclick="goToDetail('${wall.id}')">
+            <img class="dl-thumb"
+                 src="${wall.thumbnail_url}"
+                 alt="${wall.title}" />
+            <div class="dl-info">
+              <div class="dl-title">${wall.title}</div>
+              <div class="dl-meta">
+                <span class="dl-device-tag">${deviceLabel}</span>
+                <span class="dl-meta-item">🕐 ${time}</span>
+                <span class="dl-meta-item">📐 ${wall.resolution || 'HD'}</span>
+              </div>
+            </div>
+            <button class="dl-redownload-btn"
+                    onclick="redownload(event, '${wall.image_url}', '${wall.id}')">
+              ⬇️ Again
+            </button>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    listEl.innerHTML = html;
+
+  } catch (err) {
+    console.error('History load error:', err);
+    // Demo data
+    listEl.innerHTML = getDemoHistoryHTML();
+  }
+}
+
+// ---- Re-download ----
+function redownload(event, imageUrl, wallId) {
+  event.stopPropagation();
+  const a = document.createElement('a');
+  a.href = imageUrl;
+  a.download = `neowallz-${wallId}.jpg`;
+  a.target = '_blank';
+  a.click();
+}
+
+// ---- Demo HTML ----
+function getDemoHistoryHTML() {
+  return `
+    <div class="date-group-label">📅 1 May 2025</div>
+    <div class="dl-history-list">
+      <div class="dl-history-item" onclick="goToDetail('1')">
+        <img class="dl-thumb" src="https://picsum.photos/seed/naruto/60/80" alt="Naruto" />
+        <div class="dl-info">
+          <div class="dl-title">Naruto Sage Mode</div>
+          <div class="dl-meta">
+            <span class="dl-device-tag">📱 Android</span>
+            <span class="dl-meta-item">🕐 10:30 AM</span>
+            <span class="dl-meta-item">📐 4K</span>
+          </div>
+        </div>
+        <button class="dl-redownload-btn"
+          onclick="redownload(event,'https://picsum.photos/seed/naruto/1920/1080','1')">
+          ⬇️ Again
+        </button>
+      </div>
+      <div class="dl-history-item" onclick="goToDetail('3')">
+        <img class="dl-thumb" src="https://picsum.photos/seed/cyber/60/80" alt="Cyber" />
+        <div class="dl-info">
+          <div class="dl-title">Cyberpunk City Night</div>
+          <div class="dl-meta">
+            <span class="dl-device-tag">🖥️ PC HD</span>
+            <span class="dl-meta-item">🕐 02:15 PM</span>
+            <span class="dl-meta-item">📐 HD</span>
+          </div>
+        </div>
+        <button class="dl-redownload-btn"
+          onclick="redownload(event,'https://picsum.photos/seed/cyber/1920/1080','3')">
+          ⬇️ Again
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+</script>
+
+</body>
+</html>

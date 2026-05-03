@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Wallpapers — NeoWallz</title>
+  <meta name="description"
+    content="Browse 9000+ HD Anime & Gaming wallpapers. Free download for Android, iPhone, PC — NeoWallz.">
+  <meta name="theme-color" content="#0a0a0f" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://picsum.photos" />
+
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+
+  <style>
+    /* ===== WALLPAPERS PAGE ===== */
+
+    .wallpapers-hero {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 40px 0 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .wallpapers-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 10% 50%,
+          rgba(124,58,237,0.1) 0%, transparent 55%),
+        radial-gradient(ellipse at 90% 50%,
+          rgba(6,182,212,0.07) 0%, transparent 55%);
+    }
+    .wallpapers-hero .container {
+      position: relative; z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .wallpapers-hero h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin-bottom: 5px;
+    }
+    .wallpapers-hero p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ===== CATEGORY TABS ===== */
+    .cat-tabs-wrap {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 0;
+    }
+    .cat-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 2px;
+    }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition-fast);
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .cat-tab-btn:hover,
+    .cat-tab-btn.active {
+      background: var(--color-purple);
+      border-color: var(--color-purple);
+      color: white;
+    }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 0;
+      position: sticky;
+      top: 63px;
+      z-index: 90;
+    }
+    .filter-bar-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-bar-inner::-webkit-scrollbar { display: none; }
+
+    .filter-search {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+      transition: var(--transition-fast);
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+    .filter-search:focus-within {
+      border-color: var(--color-purple);
+      box-shadow: 0 0 0 2px rgba(124,58,237,0.15);
+    }
+    .filter-search input {
+      background: none; border: none; outline: none;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: var(--font-body);
+      width: 120px;
+    }
+    .filter-search input::placeholder { color: var(--text-muted); }
+
+    .filter-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+      flex-shrink: 0;
+      transition: var(--transition-fast);
+    }
+    .filter-select:focus { border-color: var(--color-purple); }
+
+    .sort-group {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .sort-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 13px;
+      border-radius: 50px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .sort-pill:hover,
+    .sort-pill.active {
+      border-color: var(--color-purple);
+      color: var(--color-purple-light);
+      background: rgba(124,58,237,0.1);
+    }
+
+    .results-count {
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .results-count span {
+      color: var(--color-cyan);
+      font-weight: 600;
+    }
+
+    /* ===== ACTIVE FILTER CHIPS ===== */
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(124,58,237,0.12);
+      border: 1px solid rgba(124,58,237,0.3);
+      color: var(--color-purple-light);
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+    }
+    .filter-chip-remove {
+      cursor: pointer;
+      color: var(--text-muted);
+      background: none; border: none;
+      font-size: 11px; padding: 0;
+      line-height: 1;
+      transition: var(--transition-fast);
+    }
+    .filter-chip-remove:hover { color: var(--color-pink); }
+
+    /* ===== CONTENT ===== */
+    .wallpapers-content {
+      padding: 28px 0 60px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 3.5rem; margin-bottom: 14px; }
+    .empty-state h3 {
+      font-family: var(--font-sub-heading);
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* ===== VIEW TOGGLE ===== */
+    .view-toggle {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .view-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: var(--transition-fast);
+    }
+    .view-btn.active,
+    .view-btn:hover {
+      border-color: var(--color-cyan);
+      color: var(--color-cyan);
+    }
+
+    /* List view */
+    .wallpaper-grid.list-view {
+      grid-template-columns: 1fr !important;
+    }
+    .wallpaper-grid.list-view .wall-card {
+      aspect-ratio: 21/9 !important;
+    }
+
+    @media (max-width: 600px) {
+      .sort-group { display: none; }
+      .filter-search input { width: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">
+      Neo<span class="text-purple">Wallz</span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html" class="active">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+      <a href="/pages/login.html"
+         class="btn btn-primary" id="loginBtn">Login</a>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="wallpapers-hero">
+  <div class="container">
+    <div>
+      <h1>🖼️ All <span class="text-purple">Wallpapers</span></h1>
+      <p>9,000+ HD wallpapers — Anime, Gaming, Cyberpunk & more</p>
+    </div>
+    <a href="/pages/search.html" class="btn btn-outline">
+      🔍 Advanced Search
+    </a>
+  </div>
+</section>
+
+<!-- ===== CATEGORY TABS ===== -->
+<div class="cat-tabs-wrap">
+  <div class="container">
+    <div class="cat-tabs" id="catTabs">
+      <button class="cat-tab-btn active"
+              onclick="setCategory('', this)">🖼️ All</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('anime', this)">⛩️ Anime</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('gaming', this)">🎮 Gaming</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('cyberpunk', this)">🌆 Cyberpunk</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('space', this)">🚀 Space</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('nature', this)">🌿 Nature</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('cars', this)">🚗 Cars</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('abstract', this)">🎨 Abstract</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('dark', this)">🌑 Dark</button>
+      <button class="cat-tab-btn"
+              onclick="setCategory('movies', this)">🎬 Movies</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FILTER BAR ===== -->
+<div class="filter-bar">
+  <div class="container filter-bar-inner">
+
+    <div class="filter-search">
+      <span style="font-size:13px;">🔍</span>
+      <input type="text" id="wallSearch"
+             placeholder="Search..."
+             oninput="onSearchInput()" />
+    </div>
+
+    <select class="filter-select" id="resFilter"
+            onchange="applyFilters()">
+      <option value="">All Res</option>
+      <option value="HD">HD</option>
+      <option value="2K">2K</option>
+      <option value="4K">4K</option>
+    </select>
+
+    <select class="filter-select" id="featFilter"
+            onchange="applyFilters()">
+      <option value="">All</option>
+      <option value="featured">⭐ Featured</option>
+    </select>
+
+    <div class="sort-group">
+      <button class="sort-pill active"
+              onclick="setSort('popular', this)">🔥 Popular</button>
+      <button class="sort-pill"
+              onclick="setSort('newest', this)">🆕 Newest</button>
+      <button class="sort-pill"
+              onclick="setSort('liked', this)">❤️ Liked</button>
+    </div>
+
+    <div class="view-toggle">
+      <button class="view-btn active" id="gridViewBtn"
+              onclick="setView('grid')" title="Grid">⊞</button>
+      <button class="view-btn" id="listViewBtn"
+              onclick="setView('list')" title="List">☰</button>
+    </div>
+
+    <div class="results-count" id="resultsCount">
+      <span>0</span> results
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<section class="wallpapers-content">
+  <div class="container">
+
+    <!-- Active filter chips -->
+    <div class="active-filters" id="activeFilters"></div>
+
+    <!-- Wallpaper Grid -->
+    <div class="wallpaper-grid" id="wallGrid"></div>
+
+    <!-- Infinite scroll loader -->
+    <div class="infinite-loader" id="infiniteLoader">
+      <div class="infinite-spinner"></div>
+      <span>Aur wallpapers load ho rahe hain...</span>
+    </div>
+
+    <!-- All loaded message -->
+    <div class="all-loaded-msg" id="allLoadedMsg">
+      Sab wallpapers load ho gaye ✨
+    </div>
+
+    <!-- Infinite scroll sentinel -->
+    <div id="infiniteScrollSentinel"></div>
+
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Neo<span class="text-purple">Wallz</span></div>
+      <p>Best Anime & Gaming wallpapers — Free forever.</p>
+    </div>
+    <div class="footer-links-group">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/pages/wallpapers.html">All Wallpapers</a></li>
+        <li><a href="/pages/category.html">Categories</a></li>
+        <li><a href="/pages/search.html">Search</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="/pages/login.html">Login / Register</a></li>
+        <li><a href="/pages/profile.html">My Profile</a></li>
+        <li><a href="/pages/saved.html">Saved</a></li>
+      </ul>
+    </div>
+    <div class="footer-links-group">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/pages/legal/privacy.html">Privacy</a></li>
+        <li><a href="/pages/legal/terms.html">Terms</a></li>
+        <li><a href="/pages/legal/dmca.html">DMCA</a></li>
+        <li><a href="/pages/legal/contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="text-muted">© 2025 NeoWallz — All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- JS -->
+<script src="../js/main.js"></script>
+<script src="../js/wallpapers.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+
+<script>
+// ============================================
+//   WALLPAPERS PAGE — INFINITE SCROLL
+// ============================================
+
+// ---- 30 Demo wallpapers ----
+const allWallpapers = [
+  { id:'1',  title:'Naruto Sage Mode',     category:'anime',    resolution:'4K', is_featured:true,  likes_count:245, thumbnail_url:'https://picsum.photos/seed/naruto/400/700',   image_url:'https://picsum.photos/seed/naruto/1920/1080'   },
+  { id:'2',  title:'Valorant Agents',      category:'gaming',   resolution:'2K', is_featured:false, likes_count:189, thumbnail_url:'https://picsum.photos/seed/valo/400/700',     image_url:'https://picsum.photos/seed/valo/1920/1080'     },
+  { id:'3',  title:'Cyberpunk City Night', category:'cyberpunk',resolution:'HD', is_featured:true,  likes_count:312, thumbnail_url:'https://picsum.photos/seed/cyber/400/700',    image_url:'https://picsum.photos/seed/cyber/1920/1080'    },
+  { id:'4',  title:'Deep Space Galaxy',    category:'space',    resolution:'4K', is_featured:false, likes_count:98,  thumbnail_url:'https://picsum.photos/seed/space/400/700',    image_url:'https://picsum.photos/seed/space/1920/1080'    },
+  { id:'5',  title:'Demon Slayer Tanjiro', category:'anime',    resolution:'HD', is_featured:false, likes_count:421, thumbnail_url:'https://picsum.photos/seed/demon/400/700',    image_url:'https://picsum.photos/seed/demon/1920/1080'    },
+  { id:'6',  title:'Minecraft Sunset',     category:'gaming',   resolution:'2K', is_featured:false, likes_count:156, thumbnail_url:'https://picsum.photos/seed/mine/400/700',     image_url:'https://picsum.photos/seed/mine/1920/1080'     },
+  { id:'7',  title:'One Piece Luffy',      category:'anime',    resolution:'4K', is_featured:true,  likes_count:534, thumbnail_url:'https://picsum.photos/seed/luffy/400/700',    image_url:'https://picsum.photos/seed/luffy/1920/1080'    },
+  { id:'8',  title:'GTA VI Miami',         category:'gaming',   resolution:'4K', is_featured:false, likes_count:678, thumbnail_url:'https://picsum.photos/seed/gta/400/700',      image_url:'https://picsum.photos/seed/gta/1920/1080'     },
+  { id:'9',  title:'Neon Tokyo Street',    category:'cyberpunk',resolution:'2K', is_featured:false, likes_count:290, thumbnail_url:'https://picsum.photos/seed/tokyo/400/700',    image_url:'https://picsum.photos/seed/tokyo/1920/1080'    },
+  { id:'10', title:'Milky Way Stars',      category:'space',    resolution:'4K', is_featured:true,  likes_count:445, thumbnail_url:'https://picsum.photos/seed/milky/400/700',    image_url:'https://picsum.photos/seed/milky/1920/1080'    },
+  { id:'11', title:'Attack on Titan',      category:'anime',    resolution:'HD', is_featured:false, likes_count:388, thumbnail_url:'https://picsum.photos/seed/titan/400/700',    image_url:'https://picsum.photos/seed/titan/1920/1080'    },
+  { id:'12', title:'CS2 Inferno',          category:'gaming',   resolution:'HD', is_featured:false, likes_count:210, thumbnail_url:'https://picsum.photos/seed/cs2/400/700',      image_url:'https://picsum.photos/seed/cs2/1920/1080'     },
+  { id:'13', title:'Dark Minimal',         category:'abstract', resolution:'2K', is_featured:false, likes_count:167, thumbnail_url:'https://picsum.photos/seed/abst/400/700',     image_url:'https://picsum.photos/seed/abst/1920/1080'    },
+  { id:'14', title:'Ferrari Night Drive',  category:'cars',     resolution:'4K', is_featured:false, likes_count:302, thumbnail_url:'https://picsum.photos/seed/ferrari/400/700',  image_url:'https://picsum.photos/seed/ferrari/1920/1080' },
+  { id:'15', title:'Forest Rain',          category:'nature',   resolution:'HD', is_featured:false, likes_count:143, thumbnail_url:'https://picsum.photos/seed/forest/400/700',   image_url:'https://picsum.photos/seed/forest/1920/1080'  },
+  { id:'16', title:'Jujutsu Kaisen',       category:'anime',    resolution:'4K', is_featured:true,  likes_count:499, thumbnail_url:'https://picsum.photos/seed/jujutsu/400/700',  image_url:'https://picsum.photos/seed/jujutsu/1920/1080' },
+  { id:'17', title:'Fortnite Zero Crisis', category:'gaming',   resolution:'2K', is_featured:false, likes_count:234, thumbnail_url:'https://picsum.photos/seed/fortnite/400/700', image_url:'https://picsum.photos/seed/fortnite/1920/1080'},
+  { id:'18', title:'Synthwave Grid',       category:'cyberpunk',resolution:'4K', is_featured:true,  likes_count:377, thumbnail_url:'https://picsum.photos/seed/synth/400/700',    image_url:'https://picsum.photos/seed/synth/1920/1080'   },
+  { id:'19', title:'Saturn Rings',         category:'space',    resolution:'2K', is_featured:false, likes_count:189, thumbnail_url:'https://picsum.photos/seed/saturn/400/700',   image_url:'https://picsum.photos/seed/saturn/1920/1080'  },
+  { id:'20', title:'Dragon Ball Goku',     category:'anime',    resolution:'HD', is_featured:false, likes_count:612, thumbnail_url:'https://picsum.photos/seed/goku/400/700',     image_url:'https://picsum.photos/seed/goku/1920/1080'    },
+  { id:'21', title:'Mountain Peak',        category:'nature',   resolution:'4K', is_featured:false, likes_count:201, thumbnail_url:'https://picsum.photos/seed/mtn/400/700',      image_url:'https://picsum.photos/seed/mtn/1920/1080'     },
+  { id:'22', title:'Lamborghini Neon',     category:'cars',     resolution:'4K', is_featured:true,  likes_count:445, thumbnail_url:'https://picsum.photos/seed/lambo/400/700',    image_url:'https://picsum.photos/seed/lambo/1920/1080'   },
+  { id:'23', title:'Geometric Waves',      category:'abstract', resolution:'HD', is_featured:false, likes_count:134, thumbnail_url:'https://picsum.photos/seed/geowav/400/700',   image_url:'https://picsum.photos/seed/geowav/1920/1080'  },
+  { id:'24', title:'Dark Minimal Desktop', category:'dark',     resolution:'4K', is_featured:false, likes_count:289, thumbnail_url:'https://picsum.photos/seed/darkmin/400/700',  image_url:'https://picsum.photos/seed/darkmin/1920/1080' },
+  { id:'25', title:'AMOLED Pure Black',    category:'dark',     resolution:'HD', is_featured:false, likes_count:567, thumbnail_url:'https://picsum.photos/seed/amoled/400/700',   image_url:'https://picsum.photos/seed/amoled/1920/1080'  },
+  { id:'26', title:'Bleach Ichigo',        category:'anime',    resolution:'2K', is_featured:false, likes_count:321, thumbnail_url:'https://picsum.photos/seed/bleach/400/700',   image_url:'https://picsum.photos/seed/bleach/1920/1080'  },
+  { id:'27', title:'Elden Ring Darkness',  category:'gaming',   resolution:'4K', is_featured:true,  likes_count:488, thumbnail_url:'https://picsum.photos/seed/elden/400/700',    image_url:'https://picsum.photos/seed/elden/1920/1080'   },
+  { id:'28', title:'Marvel Avengers',      category:'movies',   resolution:'2K', is_featured:false, likes_count:356, thumbnail_url:'https://picsum.photos/seed/marvel/400/700',   image_url:'https://picsum.photos/seed/marvel/1920/1080'  },
+  { id:'29', title:'Interstellar Space',   category:'movies',   resolution:'4K', is_featured:true,  likes_count:423, thumbnail_url:'https://picsum.photos/seed/interstl/400/700', image_url:'https://picsum.photos/seed/interstl/1920/1080'},
+  { id:'30', title:'Ocean Sunset Wave',    category:'nature',   resolution:'HD', is_featured:false, likes_count:178, thumbnail_url:'https://picsum.photos/seed/ocean/400/700',    image_url:'https://picsum.photos/seed/ocean/1920/1080'   },
+];
+
+// ---- State ----
+let currentCategory   = '';
+let currentResolution = '';
+let currentFeatured   = '';
+let currentSort       = 'popular';
+let currentSearch     = '';
+let currentView       = 'grid';
+let currentPage       = 0;
+const PAGE_SIZE       = 12;
+let filteredWalls     = [];
+let isLoading         = false;
+let searchTimer       = null;
+
+// ---- Page Load ----
+window.addEventListener('DOMContentLoaded', () => {
+  // URL param check
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('cat') || '';
+  if (cat) {
+    currentCategory = cat;
+    document.querySelectorAll('.cat-tab-btn').forEach(btn => {
+      const btnText = btn.textContent.toLowerCase();
+      btn.classList.toggle('active', btnText.includes(cat));
+    });
+  }
+
+  // Initial render
+  rebuildFilteredList();
+  renderFirstPage();
+  initInfiniteScroll(loadNextPage);
+});
+
+// ---- Filter + Sort list rebuild ----
+function rebuildFilteredList() {
+  filteredWalls = allWallpapers.filter(w => {
+    const matchCat  = !currentCategory ||
+      w.category === currentCategory;
+    const matchRes  = !currentResolution ||
+      w.resolution === currentResolution;
+    const matchFeat = !currentFeatured ||
+      w.is_featured === true;
+    const matchSrch = !currentSearch ||
+      w.title.toLowerCase().includes(currentSearch.toLowerCase()) ||
+      w.category.toLowerCase().includes(currentSearch.toLowerCase());
+    return matchCat && matchRes && matchFeat && matchSrch;
+  });
+
+  // Sort karo
+  if (currentSort === 'liked') {
+    filteredWalls.sort((a, b) => b.likes_count - a.likes_count);
+  } else if (currentSort === 'newest') {
+    filteredWalls.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+  } else {
+    filteredWalls.sort((a, b) => b.likes_count - a.likes_count);
+  }
+
+  // Results count update
+  document.getElementById('resultsCount').innerHTML =
+    `<span>${filteredWalls.length}</span> results`;
+
+  updateFilterChips();
+}
+
+// ---- Render first page (with skeletons) ----
+function renderFirstPage() {
+  currentPage = 0;
+  const grid = document.getElementById('wallGrid');
+
+  // Loader hide karo
+  document.getElementById('infiniteLoader')
+    .classList.remove('show');
+  document.getElementById('allLoadedMsg')
+    .classList.remove('show');
+
+  if (filteredWalls.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>Koi wallpaper nahi mila</h3>
+        <p>Filters clear karo ya alag search try karo</p>
+        <button class="btn btn-outline"
+                onclick="clearAllFilters()"
+                style="margin-top:16px;">
+          Clear Filters
+        </button>
+      </div>`;
+    return;
+  }
+
+  // Pehle skeletons dikhao
+  showSkeletons('wallGrid', Math.min(PAGE_SIZE, filteredWalls.length));
+
+  // Thodi der baad real cards load karo
+  setTimeout(() => {
+    const firstPage = filteredWalls.slice(0, PAGE_SIZE);
+    renderWallpaperGrid(firstPage, 'wallGrid');
+    currentPage = 1;
+
+    // List view maintain
+    if (currentView === 'list') {
+      document.getElementById('wallGrid')
+        .classList.add('list-view');
+    }
+
+    // Check all loaded
+    checkAllLoaded();
+
+  }, 400);
+}
+
+// ---- Load next page (infinite scroll) ----
+function loadNextPage() {
+  if (isLoading) return;
+
+  const start = currentPage * PAGE_SIZE;
+  if (start >= filteredWalls.length) return;
+
+  isLoading = true;
+
+  // Loader dikhao
+  document.getElementById('infiniteLoader').classList.add('show');
+
+  setTimeout(() => {
+    const nextPage = filteredWalls.slice(start, start + PAGE_SIZE);
+
+    if (nextPage.length > 0) {
+      appendWallpapers(nextPage, 'wallGrid', start);
+      currentPage++;
+    }
+
+    document.getElementById('infiniteLoader').classList.remove('show');
+    isLoading = false;
+
+    // List view maintain
+    if (currentView === 'list') {
+      document.getElementById('wallGrid')
+        .classList.add('list-view');
+    }
+
+    checkAllLoaded();
+  }, 600);
+}
+
+// ---- Check if all loaded ----
+function checkAllLoaded() {
+  const totalLoaded = currentPage * PAGE_SIZE;
+  if (totalLoaded >= filteredWalls.length && filteredWalls.length > 0) {
+    document.getElementById('allLoadedMsg').classList.add('show');
+  }
+}
+
+// ---- Category ----
+function setCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-tab-btn').forEach(b =>
+    b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const url = new URL(window.location);
+  if (cat) url.searchParams.set('cat', cat);
+  else url.searchParams.delete('cat');
+  window.history.pushState({}, '', url);
+
+  rebuildFilteredList();
+  renderFirstPage();
+}
+
+// ---- Search ----
+function onSearchInput() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    currentSearch = document.getElementById('wallSearch')
+      .value.trim();
+    rebuildFilteredList();
+    renderFirstPage();
+  }, 350);
+}
+
+// ---- Filters ----
+function applyFilters() {
+  currentResolution = document.getElementById('resFilter').value;
+  currentFeatured   = document.getElementById('featFilter').value;
+  rebuildFilteredList();
+  renderFirstPage();
+}
+
+// ---- Sort ----
+function setSort(sort, btn) {
+  currentSort = sort;
+  document.querySelectorAll('.sort-pill').forEach(b =>
+    b.classList.remove('active'));
+  btn.classList.add('active');
+  rebuildFilteredList();
+  renderFirstPage();
+}
+
+// ---- View Toggle ----
+function setView(view) {
+  currentView = view;
+  const grid = document.getElementById('wallGrid');
+  document.getElementById('gridViewBtn')
+    .classList.toggle('active', view === 'grid');
+  document.getElementById('listViewBtn')
+    .classList.toggle('active', view === 'list');
+
+  if (view === 'list') {
+    grid.classList.add('list-view');
+  } else {
+    grid.classList.remove('list-view');
+  }
+}
+
+// ---- Filter chips ----
+function updateFilterChips() {
+  const container = document.getElementById('activeFilters');
+  const chips = [];
+  if (currentCategory)
+    chips.push(`<div class="filter-chip">
+      ${currentCategory}
+      <button class="filter-chip-remove"
+              onclick="clearFilter('category')">✕</button>
+    </div>`);
+  if (currentResolution)
+    chips.push(`<div class="filter-chip">
+      ${currentResolution}
+      <button class="filter-chip-remove"
+              onclick="clearFilter('resolution')">✕</button>
+    </div>`);
+  if (currentFeatured)
+    chips.push(`<div class="filter-chip">
+      ⭐ Featured
+      <button class="filter-chip-remove"
+              onclick="clearFilter('featured')">✕</button>
+    </div>`);
+  if (currentSearch)
+    chips.push(`<div class="filter-chip">
+      🔍 "${currentSearch}"
+      <button class="filter-chip-remove"
+              onclick="clearFilter('search')">✕</button>
+    </div>`);
+  container.innerHTML = chips.join('');
+}
+
+// ---- Clear filter ----
+function clearFilter(type) {
+  if (type === 'category') {
+    currentCategory = '';
+    document.querySelectorAll('.cat-tab-btn')
+      .forEach(b => b.classList.remove('active'));
+    document.querySelector('.cat-tab-btn')
+      .classList.add('active');
+  }
+  if (type === 'resolution') {
+    currentResolution = '';
+    document.getElementById('resFilter').value = '';
+  }
+  if (type === 'featured') {
+    currentFeatured = '';
+    document.getElementById('featFilter').value = '';
+  }
+  if (type === 'search') {
+    currentSearch = '';
+    document.getElementById('wallSearch').value = '';
+  }
+  rebuildFilteredList();
+  renderFirstPage();
+}
+
+// ---- Clear all ----
+function clearAllFilters() {
+  currentCategory = currentResolution =
+  currentFeatured = currentSearch = '';
+  document.getElementById('wallSearch').value = '';
+  document.getElementById('resFilter').value  = '';
+  document.getElementById('featFilter').value = '';
+  document.querySelectorAll('.cat-tab-btn')
+    .forEach(b => b.classList.remove('active'));
+  document.querySelector('.cat-tab-btn').classList.add('active');
+  rebuildFilteredList();
+  renderFirstPage();
+}
+
+</script>
+
+</body>
+</html>

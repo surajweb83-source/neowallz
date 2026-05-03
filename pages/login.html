@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login / Register — NeoWallz</title>
+  <meta name="description" content="Login or Register on NeoWallz to like, save wallpapers.">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    /* ===== LOGIN PAGE STYLES ===== */
+
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background glow */
+    .auth-page::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(124,58,237,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 70%, rgba(6,182,212,0.08) 0%, transparent 60%);
+      z-index: 0;
+    }
+
+    .auth-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 480px) {
+      .auth-box { padding: 28px 20px; }
+    }
+
+    /* Logo on top */
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .auth-logo .logo-text {
+      font-family: var(--font-heading);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text-primary);
+    }
+    .auth-logo p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    /* Tabs — Login / Register */
+    .auth-tabs {
+      display: flex;
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-sub-heading);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: var(--transition-fast);
+      border: none;
+      background: none;
+    }
+    .auth-tab.active {
+      background: var(--color-purple);
+      color: white;
+    }
+
+    /* Form */
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-family: var(--font-sub-heading);
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      font-size: 15px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: var(--transition-fast);
+    }
+    .form-input:focus {
+      border-color: var(--color-purple);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Password field with show/hide */
+    .password-wrap {
+      position: relative;
+    }
+    .password-wrap .form-input {
+      padding-right: 48px;
+    }
+    .toggle-pass {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      transition: var(--transition-fast);
+      padding: 0;
+    }
+    .toggle-pass:hover { color: var(--text-primary); }
+
+    /* Forgot password */
+    .forgot-link {
+      display: block;
+      text-align: right;
+      color: var(--color-cyan);
+      font-size: 12px;
+      margin-top: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition-fast);
+    }
+    .forgot-link:hover { color: var(--color-purple-light); }
+
+    /* Submit button */
+    .auth-submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--color-purple);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sub-heading);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .auth-submit-btn:hover {
+      background: var(--color-purple-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+    }
+    .auth-submit-btn:active {
+      transform: scale(0.98);
+    }
+    .auth-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    /* Google / OAuth button */
+    .oauth-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-sub-heading);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .oauth-btn:hover {
+      border-color: var(--color-purple);
+      background: var(--bg-hover);
+    }
+
+    /* Alert / Error message */
+    .auth-alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .auth-alert.error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171;
+      display: flex;
+    }
+    .auth-alert.success {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #4ade80;
+      display: flex;
+    }
+
+    /* Loading spinner */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    /* Bottom text */
+    .auth-bottom-text {
+      text-align: center;
+      margin-top: 22px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .auth-bottom-text a {
+      color: var(--color-cyan);
+    }
+
+    /* Terms text */
+    .terms-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+    .terms-text a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+
+    /* Forgot password view */
+    .forgot-view { display: none; }
+    .forgot-view.active { display: block; }
+    .back-to-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      padding: 0;
+      margin-bottom: 20px;
+      transition: var(--transition-fast);
+    }
+    .back-to-login:hover { color: var(--color-cyan); }
+
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <a href="/index.html" class="logo">Neo<span class="text-purple">Wallz</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/pages/wallpapers.html">Wallpapers</a></li>
+      <li><a href="/pages/category.html">Categories</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeToggle">🌙</button>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== AUTH PAGE ===== -->
+<div class="auth-page">
+  <div class="auth-box">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="logo-text">Neo<span class="text-purple">Wallz</span></div>
+      <p>Wallpapers like & save karne ke liye login karo</p>
+    </div>
+
+    <!-- ===== MAIN AUTH VIEW ===== -->
+    <div id="mainAuthView">
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab"
+                onclick="switchTab('login')">
+          🔑 Login
+        </button>
+        <button class="auth-tab" id="registerTab"
+                onclick="switchTab('register')">
+          ✨ Register
+        </button>
+      </div>
+
+      <!-- Alert box -->
+      <div class="auth-alert" id="authAlert">
+        <span id="alertIcon">⚠️</span>
+        <span id="alertMsg">Error message here</span>
+      </div>
+
+      <!-- ===== LOGIN FORM ===== -->
+      <form class="auth-form active" id="loginForm"
+            onsubmit="handleLogin(event)">
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="loginEmail"
+                 placeholder="apna@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="password-wrap">
+            <input class="form-input" type="password" id="loginPassword"
+                   placeholder="••••••••" required />
+            <button type="button" class="toggle-pass"
+                    onclick="togglePassword('loginPassword', this)">
+              👁️
+            </button>
+          </div>
+          <a class="forgot-link" onclick="showForgotView()">
+            Forgot password?
+          </a>
+        </div>
+
+        <button type="submit" class="auth-submit-btn" id="loginBtn">
+          <div class="spinner" id="loginSpinner"></div>
+          <span id="loginBtnText">🔑 Login</span>
+        </button>
+
+      </form>
+
+      <!-- ===== REGISTER FORM ===== -->
+      <form class="auth-form" id="registerForm"
+            onsubmit="handleRegister(event)">
+
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" type="text" id="regUsername"
+                 placeholder="cooluser123"
+                 minlength="3" maxlength="20" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="regEmail"
+                 placeholder="apna@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="password-wrap">
+            <input class="form-input" type="password" id="regPassword"
+                   placeholder="Min 6 characters"
+                   minlength="6" required />
+            <button type="button" class="toggle-pass"
+                    onclick="togglePassword('regPassword', this)">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div class="password-wrap">
+            <input class="form-input" type="password" id="regConfirm"
+                   placeholder="Password dobara likho"
+                   minlength="6" required />
+            <button type="button" class="toggle-pass"
+                    onclick="togglePassword('regConfirm', this)">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-submit-btn" id="registerBtn">
+          <div class="spinner" id="registerSpinner"></div>
+          <span id="registerBtnText">✨ Create Account</span>
+        </button>
+
+        <p class="terms-text">
+          Register karke aap hamare
+          <a href="/pages/legal/terms.html">Terms of Service</a> aur
+          <a href="/pages/legal/privacy.html">Privacy Policy</a>
+          se agree karte ho.
+        </p>
+
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">ya</div>
+
+      <!-- Google Login -->
+      <button class="oauth-btn" onclick="loginWithGoogle()">
+        <span style="font-size:1.2rem;">🌐</span>
+        Google se Login karo
+      </button>
+
+    </div>
+
+    <!-- ===== FORGOT PASSWORD VIEW ===== -->
+    <div id="forgotView" class="forgot-view">
+
+      <button class="back-to-login" onclick="hideForgotView()">
+        ← Wapas Login
+      </button>
+
+      <h3 style="font-family:var(--font-sub-heading);margin-bottom:8px;">
+        🔐 Password Reset
+      </h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">
+        Apna email daalo — reset link bhejenge
+      </p>
+
+      <div class="auth-alert" id="forgotAlert"></div>
+
+      <form onsubmit="handleForgotPassword(event)">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="forgotEmail"
+                 placeholder="apna@email.com" required />
+        </div>
+        <button type="submit" class="auth-submit-btn" id="forgotBtn">
+          <div class="spinner" id="forgotSpinner"></div>
+          <span id="forgotBtnText">📧 Reset Link Bhejo</span>
+        </button>
+      </form>
+
+    </div>
+
+    <!-- Bottom text -->
+    <div class="auth-bottom-text">
+      <a href="/index.html">← Wapas Homepage pe jao</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- JS -->
+<script src="../js/supabase.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+
+// ============================================
+//   LOGIN PAGE JS
+// ============================================
+
+// ---- Tab Switch ----
+function switchTab(tab) {
+  const loginTab     = document.getElementById('loginTab');
+  const registerTab  = document.getElementById('registerTab');
+  const loginForm    = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+
+  clearAlert();
+
+  if (tab === 'login') {
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+    loginForm.classList.add('active');
+    registerForm.classList.remove('active');
+  } else {
+    registerTab.classList.add('active');
+    loginTab.classList.remove('active');
+    registerForm.classList.add('active');
+    loginForm.classList.remove('active');
+  }
+}
+
+// ---- Show Alert ----
+function showAlert(msg, type = 'error') {
+  const alert = document.getElementById('authAlert');
+  const alertMsg = document.getElementById('alertMsg');
+  const alertIcon = document.getElementById('alertIcon');
+  alertMsg.textContent = msg;
+  alertIcon.textContent = type === 'error' ? '⚠️' : '✅';
+  alert.className = `auth-alert ${type}`;
+}
+
+function clearAlert() {
+  const alert = document.getElementById('authAlert');
+  alert.className = 'auth-alert';
+}
+
+// ---- Loading State ----
+function setLoading(btnId, spinnerId, textId, loading, text) {
+  const btn     = document.getElementById(btnId);
+  const spinner = document.getElementById(spinnerId);
+  const btnText = document.getElementById(textId);
+  btn.disabled = loading;
+  spinner.style.display = loading ? 'block' : 'none';
+  btnText.textContent = loading ? 'Please wait...' : text;
+}
+
+// ---- Toggle Password Visibility ----
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+// ---- LOGIN ----
+async function handleLogin(e) {
+  e.preventDefault();
+  clearAlert();
+
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!email || !password) {
+    showAlert('Email aur password dono bharo!');
+    return;
+  }
+
+  setLoading('loginBtn', 'loginSpinner', 'loginBtnText', true, '🔑 Login');
+
+  try {
+    const supabase = window._supabase;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      // Error messages Hinglish mein
+      let msg = 'Login fail hua. Dobara try karo.';
+      if (error.message.includes('Invalid login'))
+        msg = '❌ Email ya password galat hai!';
+      if (error.message.includes('Email not confirmed'))
+        msg = '📧 Pehle email verify karo!';
+      showAlert(msg);
+    } else {
+      // Success
+      showAlert('✅ Login ho gaya! Redirect ho raha hai...', 'success');
+      setTimeout(() => {
+        // Kahan se aaya tha check karo
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+        window.location.href = redirect || '/index.html';
+      }, 1200);
+    }
+  } catch (err) {
+    showAlert('Network error. Internet check karo!');
+  }
+
+  setLoading('loginBtn', 'loginSpinner', 'loginBtnText', false, '🔑 Login');
+}
+
+// ---- REGISTER ----
+async function handleRegister(e) {
+  e.preventDefault();
+  clearAlert();
+
+  const username = document.getElementById('regUsername').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirm  = document.getElementById('regConfirm').value;
+
+  // Validations
+  if (!username || !email || !password || !confirm) {
+    showAlert('Saare fields bharo!');
+    return;
+  }
+  if (username.length < 3) {
+    showAlert('Username kam se kam 3 characters ka hona chahiye!');
+    return;
+  }
+  if (password.length < 6) {
+    showAlert('Password kam se kam 6 characters ka hona chahiye!');
+    return;
+  }
+  if (password !== confirm) {
+    showAlert('❌ Dono passwords match nahi kar rahe!');
+    return;
+  }
+
+  setLoading('registerBtn', 'registerSpinner', 'registerBtnText',
+    true, '✨ Create Account');
+
+  try {
+    const supabase = window._supabase;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: username,
+          avatar_url: '',
+          role: 'user'
+        }
+      }
+    });
+
+    if (error) {
+      let msg = 'Registration fail hua. Dobara try karo.';
+      if (error.message.includes('already registered'))
+        msg = '📧 Ye email pehle se registered hai! Login karo.';
+      if (error.message.includes('Password'))
+        msg = '🔐 Password strong banao (6+ characters)!';
+      showAlert(msg);
+    } else {
+      showAlert(
+        '🎉 Account ban gaya! Email check karo — verify link aaya hoga.',
+        'success'
+      );
+      // Login tab pe le jao
+      setTimeout(() => switchTab('login'), 2500);
+    }
+  } catch (err) {
+    showAlert('Network error. Internet check karo!');
+  }
+
+  setLoading('registerBtn', 'registerSpinner', 'registerBtnText',
+    false, '✨ Create Account');
+}
+
+// ---- GOOGLE LOGIN ----
+async function loginWithGoogle() {
+  try {
+    const supabase = window._supabase;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/index.html'
+      }
+    });
+    if (error) showAlert('Google login fail hua!');
+  } catch {
+    showAlert('Google login mein error aaya!');
+  }
+}
+
+// ---- FORGOT PASSWORD ----
+function showForgotView() {
+  document.getElementById('mainAuthView').style.display = 'none';
+  document.getElementById('forgotView').classList.add('active');
+}
+function hideForgotView() {
+  document.getElementById('mainAuthView').style.display = 'block';
+  document.getElementById('forgotView').classList.remove('active');
+}
+
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) return;
+
+  setLoading('forgotBtn', 'forgotSpinner', 'forgotBtnText',
+    true, '📧 Reset Link Bhejo');
+
+  try {
+    const supabase = window._supabase;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/pages/login.html'
+    });
+
+    const forgotAlert = document.getElementById('forgotAlert');
+    if (error) {
+      forgotAlert.className = 'auth-alert error';
+      forgotAlert.textContent = '❌ Error aaya. Email sahi hai?';
+    } else {
+      forgotAlert.className = 'auth-alert success';
+      forgotAlert.textContent = '✅ Reset link bhej diya! Email check karo.';
+    }
+  } catch {
+    const forgotAlert = document.getElementById('forgotAlert');
+    forgotAlert.className = 'auth-alert error';
+    forgotAlert.textContent = '❌ Network error!';
+  }
+
+  setLoading('forgotBtn', 'forgotSpinner', 'forgotBtnText',
+    false, '📧 Reset Link Bhejo');
+}
+
+// ---- Already logged in? Redirect ----
+async function checkAlreadyLoggedIn() {
+  const supabase = window._supabase;
+  if (!supabase) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    window.location.href = '/index.html';
+  }
+}
+
+// Page load
+window.addEventListener('DOMContentLoaded', () => {
+  checkAlreadyLoggedIn();
+});
+
+</script>
+
+</body>
+</html>
